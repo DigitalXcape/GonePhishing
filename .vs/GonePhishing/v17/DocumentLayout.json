@@ -1,0 +1,143 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|c:\\users\\kodyp\\source\\repos\\gonephishing\\views\\scan\\status.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|solutionrelative:views\\scan\\status.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|c:\\users\\kodyp\\source\\repos\\gonephishing\\models\\scandbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|solutionrelative:models\\scandbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|c:\\users\\kodyp\\source\\repos\\gonephishing\\services\\scannerbackgroundservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|solutionrelative:services\\scannerbackgroundservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|c:\\users\\kodyp\\source\\repos\\gonephishing\\controllers\\scancontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|solutionrelative:controllers\\scancontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|c:\\users\\kodyp\\source\\repos\\gonephishing\\utilities\\typogenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|solutionrelative:utilities\\typogenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|c:\\users\\kodyp\\source\\repos\\gonephishing\\views\\scan\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|solutionrelative:views\\scan\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|c:\\users\\kodyp\\source\\repos\\gonephishing\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e506b91c-c606-466a-90a9-123d1d1e12b3}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T19:09:52.102Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Status.cshtml",
+              "DocumentMoniker": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\Views\\Scan\\Status.cshtml",
+              "RelativeDocumentMoniker": "Views\\Scan\\Status.cshtml",
+              "ToolTip": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\Views\\Scan\\Status.cshtml",
+              "RelativeToolTip": "Views\\Scan\\Status.cshtml",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAADAAAABQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-27T19:09:40.984Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\Views\\Scan\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Scan\\Index.cshtml",
+              "ToolTip": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\Views\\Scan\\Index.cshtml",
+              "RelativeToolTip": "Views\\Scan\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-27T19:08:46.71Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ScanController.cs",
+              "DocumentMoniker": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\Controllers\\ScanController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ScanController.cs",
+              "ToolTip": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\Controllers\\ScanController.cs",
+              "RelativeToolTip": "Controllers\\ScanController.cs",
+              "ViewState": "AgIAACkAAAAAAAAAAAAwwEYAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T19:07:19.279Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "TypoGenerator.cs",
+              "DocumentMoniker": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\Utilities\\TypoGenerator.cs",
+              "RelativeDocumentMoniker": "Utilities\\TypoGenerator.cs",
+              "ToolTip": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\Utilities\\TypoGenerator.cs",
+              "RelativeToolTip": "Utilities\\TypoGenerator.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAQwAoAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T19:04:44.767Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ScannerBackgroundService.cs",
+              "DocumentMoniker": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\Services\\ScannerBackgroundService.cs",
+              "RelativeDocumentMoniker": "Services\\ScannerBackgroundService.cs",
+              "ToolTip": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\Services\\ScannerBackgroundService.cs",
+              "RelativeToolTip": "Services\\ScannerBackgroundService.cs",
+              "ViewState": "AgIAAEgAAAAAAAAAAAAowEsAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T19:03:15.451Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ScanDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\Models\\ScanDbContext.cs",
+              "RelativeDocumentMoniker": "Models\\ScanDbContext.cs",
+              "ToolTip": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\Models\\ScanDbContext.cs",
+              "RelativeToolTip": "Models\\ScanDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T19:00:35.098Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
