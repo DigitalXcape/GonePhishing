@@ -58,9 +58,10 @@ namespace GonePhishing.Controllers
                     // Add a DomainTask for each generated domain
                     _db.DomainTasks.Add(new DomainTask
                     {
-                        ScanJobId = job.Id,         // Link to parent job
-                        CandidateDomain = v,        // The typo-squatted domain
-                        State = DomainState.Pending // Initial state: Pending
+                        ScanJobId = job.Id,
+                        CandidateDomain = v,
+                        State = DomainState.Pending,
+                        IPAddresses = ""
                     });
                 }
             }
