@@ -27,16 +27,14 @@ namespace GonePhishing.Services
         {
             _logger.LogInformation("ScannerBackgroundService started.");
 
-            // Loop continuously until service is stopped
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-                    // Create a new scope to get a fresh DbContext instance for this iteration
                     using var scope = _svcProvider.CreateScope();
                     var db = scope.ServiceProvider.GetRequiredService<ScanDbContext>();
 
-                    // Pick the next domain task that is still pending
+                    // Get the next pending task
                     var next = await db.DomainTasks
                         .Where(t => t.State == DomainState.Pending)
                         .OrderBy(t => t.Id)
@@ -44,26 +42,23 @@ namespace GonePhishing.Services
 
                     if (next == null)
                     {
-                        // No pending tasks, wait 1 second before checking again
                         await Task.Delay(1000, stoppingToken);
                         continue;
                     }
 
-                    // Mark the task as currently being processed
+                    // Mark as processing
                     next.State = DomainState.Processing;
                     await db.SaveChangesAsync(stoppingToken);
 
-                    // Perform DNS + HTTP checks
+                    // Process DNS and HTTP
                     await ProcessDomainTask(next, db, stoppingToken);
                 }
                 catch (TaskCanceledException)
                 {
-                    // Service is shutting down, break the loop
-                    break;
+                    break; // shutting down
                 }
                 catch (Exception ex)
                 {
-                    // Log any unexpected exceptions, wait a moment before retrying
                     _logger.LogError(ex, "Background loop error.");
                     await Task.Delay(2000, stoppingToken);
                 }
@@ -83,16 +78,15 @@ namespace GonePhishing.Services
                 try
                 {
                     var ips = new List<string>();
-
-                    // Get all IP addresses for the domain
                     var addresses = await Dns.GetHostAddressesAsync(task.CandidateDomain);
-                    foreach (var a in addresses) ips.Add(a.ToString());
 
-                    task.IPAddresses = string.Join(",", ips);
+                    foreach (var a in addresses)
+                        ips.Add(a.ToString());
+
+                    task.IPAddresses = string.Join(",", ips) ?? "";
                 }
                 catch (Exception dnsEx)
                 {
-                    // If DNS fails, store empty IPs but continue to HTTP check
                     task.IPAddresses = "";
                     _logger.LogInformation("DNS failed for {d}: {e}", task.CandidateDomain, dnsEx.Message);
                 }
@@ -103,53 +97,53 @@ namespace GonePhishing.Services
                 try
                 {
                     HttpResponseMessage resp = null;
-                    var tried = new[] { $"http://{task.CandidateDomain}/", $"https://{task.CandidateDomain}/" };
+                    var urls = new[] { $"http://{task.CandidateDomain}/", $"https://{task.CandidateDomain}/" };
 
-                    // Try each URL until one succeeds
-                    foreach (var u in tried)
+                    foreach (var u in urls)
                     {
                         try
                         {
                             var request = new HttpRequestMessage(HttpMethod.Get, u);
                             resp = await _http.SendAsync(request, ct);
-                            if (resp != null) break; // success, stop trying
+                            if (resp != null) break;
                         }
-                        catch (HttpRequestException)
-                        {
-                            // network errors, continue to next URL
-                        }
-                        catch (TaskCanceledException)
-                        {
-                            // timeout, continue to next URL
-                        }
+                        catch (HttpRequestException) { }
+                        catch (TaskCanceledException) { }
                     }
 
-                    // If we got a response, store status code & reason
-                    if (resp != null)
-                    {
-                        task.HttpStatus = (int)resp.StatusCode;
-                        task.HttpReason = resp.ReasonPhrase;
-                    }
+                    task.HttpStatus = resp != null ? (int?)resp.StatusCode : null;
+                    task.HttpReason = resp?.ReasonPhrase ?? "";
                 }
                 catch (Exception httpEx)
                 {
-                    // Catch unexpected HTTP errors
+                    task.HttpStatus = null;
+                    task.HttpReason = "";
                     _logger.LogInformation("HTTP check error for {d}: {e}", task.CandidateDomain, httpEx.Message);
                 }
 
                 // ---------------------------
-                // Mark task as completed
+                // Finalize task
                 // ---------------------------
                 task.State = DomainState.Done;
                 task.ProcessedAt = DateTime.UtcNow;
+
+                // Ensure Error is not null
+                task.Error = task.Error ?? "";
+
                 await db.SaveChangesAsync(ct);
             }
             catch (Exception ex)
             {
-                // If something unexpected happens, mark task as Error
+                // Mark as error
                 task.State = DomainState.Error;
-                task.Error = ex.Message;
+                task.Error = ex.Message ?? "Unknown error";
                 task.ProcessedAt = DateTime.UtcNow;
+
+                // Safe defaults
+                task.IPAddresses = task.IPAddresses ?? "";
+                task.HttpReason = task.HttpReason ?? "";
+                task.HttpStatus ??= null;
+
                 await db.SaveChangesAsync(ct);
             }
         }

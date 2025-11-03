@@ -55,13 +55,14 @@ namespace GonePhishing.Controllers
             {
                 foreach (var v in TypoGenerator.GenerateVariants(seed))
                 {
-                    // Add a DomainTask for each generated domain
                     _db.DomainTasks.Add(new DomainTask
                     {
                         ScanJobId = job.Id,
                         CandidateDomain = v,
                         State = DomainState.Pending,
-                        IPAddresses = ""
+                        IPAddresses = "",
+                        HttpReason = "",
+                        Error = ""
                     });
                 }
             }
