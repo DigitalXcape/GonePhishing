@@ -36,7 +36,8 @@ namespace GonePhishing.Controllers
             var job = new ScanJob
             {
                 CreatedAt = DateTime.UtcNow,
-                SeedDomains = domains
+                SeedDomains = domains,
+                Owner = "Anonymous"
             };
 
             // Save the ScanJob to DB
