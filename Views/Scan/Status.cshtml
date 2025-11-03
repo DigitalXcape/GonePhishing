@@ -1,6 +1,6 @@
-﻿@model IEnumerable<DomainScanner.Models.DomainTask>
+﻿@model IEnumerable<GonePhishing.Models.DomainTask>
 @{
-    var job = ViewData["Job"] as DomainScanner.Models.ScanJob;
+    var job = ViewData["Job"] as GonePhishing.Models.ScanJob;
     ViewData["Title"] = "Status";
 }
 <h2>Scan Status - Job @job.Id</h2>

@@ -3224,11 +3224,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\GonePhishing.csproj",
+      "projectUniqueName": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\GonePhishing.csproj",
       "projectName": "GonePhishing",
-      "projectPath": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\GonePhishing.csproj",
+      "projectPath": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\GonePhishing.csproj",
       "packagesPath": "C:\\Users\\kodyp\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\kodyp\\source\\repos\\GonePhishing\\obj\\",
+      "outputPath": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

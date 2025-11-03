@@ -17,47 +17,47 @@ build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = GonePhishing
 build_property.RootNamespace = GonePhishing
-build_property.ProjectDir = C:\Users\kodyp\source\repos\GonePhishing\
+build_property.ProjectDir = C:\Users\kodyp\OneDrive\Desktop\schoolstuff\SecureSoftware\GonePhishing\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = C:\Users\kodyp\source\repos\GonePhishing
+build_property.MSBuildProjectDirectory = C:\Users\kodyp\OneDrive\Desktop\schoolstuff\SecureSoftware\GonePhishing
 build_property._RazorSourceGeneratorDebug = 
 
-[C:/Users/kodyp/source/repos/GonePhishing/Views/Home/Index.cshtml]
+[C:/Users/kodyp/OneDrive/Desktop/schoolstuff/SecureSoftware/GonePhishing/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/kodyp/source/repos/GonePhishing/Views/Home/Privacy.cshtml]
+[C:/Users/kodyp/OneDrive/Desktop/schoolstuff/SecureSoftware/GonePhishing/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/kodyp/source/repos/GonePhishing/Views/Scan/Index.cshtml]
+[C:/Users/kodyp/OneDrive/Desktop/schoolstuff/SecureSoftware/GonePhishing/Views/Scan/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2NhblxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/kodyp/source/repos/GonePhishing/Views/Scan/Status.cshtml]
+[C:/Users/kodyp/OneDrive/Desktop/schoolstuff/SecureSoftware/GonePhishing/Views/Scan/Status.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2NhblxTdGF0dXMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/kodyp/source/repos/GonePhishing/Views/Shared/Error.cshtml]
+[C:/Users/kodyp/OneDrive/Desktop/schoolstuff/SecureSoftware/GonePhishing/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/kodyp/source/repos/GonePhishing/Views/Shared/_ValidationScriptsPartial.cshtml]
+[C:/Users/kodyp/OneDrive/Desktop/schoolstuff/SecureSoftware/GonePhishing/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/kodyp/source/repos/GonePhishing/Views/_ViewImports.cshtml]
+[C:/Users/kodyp/OneDrive/Desktop/schoolstuff/SecureSoftware/GonePhishing/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/kodyp/source/repos/GonePhishing/Views/_ViewStart.cshtml]
+[C:/Users/kodyp/OneDrive/Desktop/schoolstuff/SecureSoftware/GonePhishing/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/kodyp/source/repos/GonePhishing/Views/Shared/_Layout.cshtml]
+[C:/Users/kodyp/OneDrive/Desktop/schoolstuff/SecureSoftware/GonePhishing/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-gpfe5sqfj3
