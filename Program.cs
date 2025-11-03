@@ -10,9 +10,6 @@ builder.Services.AddDbContext<ScanDbContext>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddHostedService<ScannerBackgroundService>();
 
-builder.Services.AddDbContext<ScanDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
