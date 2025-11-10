@@ -26,32 +26,52 @@ namespace GonePhishing.Controllers
         // Handle submission of domain list
         // -------------------------------
         [HttpPost]
-        public async Task<IActionResult> Start(string domains)
+        public async Task<IActionResult> Start(string domains, IFormFile domainFile)
         {
-            // If input is empty, redirect back to the input form
-            if (string.IsNullOrWhiteSpace(domains))
+            // Collect all domain lines from textarea + file
+            var allDomains = new List<string>();
+
+            // Process textarea input
+            if (!string.IsNullOrWhiteSpace(domains))
+            {
+                var lines = domains.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                                   .Select(l => l.Trim())
+                                   .Where(l => !string.IsNullOrWhiteSpace(l));
+                allDomains.AddRange(lines);
+            }
+
+            // Process uploaded file
+            if (domainFile != null && domainFile.Length > 0)
+            {
+                using var reader = new StreamReader(domainFile.OpenReadStream());
+                while (!reader.EndOfStream)
+                {
+                    var line = (await reader.ReadLineAsync())?.Trim();
+                    if (!string.IsNullOrEmpty(line))
+                        allDomains.Add(line);
+                }
+            }
+
+            // If no domains provided, redirect back
+            if (!allDomains.Any())
                 return RedirectToAction(nameof(Index));
+
+            // Remove duplicates
+            allDomains = allDomains.Distinct().ToList();
 
             // Create a new ScanJob entry
             var job = new ScanJob
             {
                 CreatedAt = DateTime.UtcNow,
-                SeedDomains = domains,
+                SeedDomains = string.Join("\n", allDomains),
                 Owner = "Anonymous",
             };
 
-            // Save the ScanJob to DB
             _db.ScanJobs.Add(job);
             await _db.SaveChangesAsync();
 
-            // Split the input into lines, trim whitespace, remove empty lines, remove duplicates
-            var lines = domains.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(l => l.Trim())
-                .Where(l => !string.IsNullOrWhiteSpace(l))
-                .Distinct();
-
-            // For each seed domain, generate typo-squatted variants
-            foreach (var seed in lines)
+            // Generate tasks for each seed domain
+            foreach (var seed in allDomains)
             {
                 foreach (var v in TypoGenerator.GenerateVariants(seed))
                 {
@@ -68,10 +88,8 @@ namespace GonePhishing.Controllers
                 }
             }
 
-            // Save all tasks to DB
             await _db.SaveChangesAsync();
 
-            // Redirect to the Status page to see progress
             return RedirectToAction(nameof(Status), new { id = job.Id });
         }
 

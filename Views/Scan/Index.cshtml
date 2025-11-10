@@ -3,10 +3,13 @@
 }
 <h2>Start Domain Scan</h2>
 
-<form method="post" asp-action="Start">
+<form method="post" asp-action="Start" enctype="multipart/form-data">
     <label>Paste domains (one per line):</label><br />
-    <textarea name="domains" rows="10" cols="80"></textarea><br />
+    <textarea name="domains" rows="10" cols="80"></textarea><br /><br />
+
+    <label>Or upload a file with domains (one per line):</label><br />
+    <input type="file" name="domainFile" accept=".txt" /><br /><br />
+
     <button type="submit">Start Scan</button>
 </form>
 <p>Notes: The service will generate a few variants per domain and scan them. Run only inside your lab.</p>
-
