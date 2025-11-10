@@ -65,6 +65,7 @@ namespace GonePhishing.Controllers
                 CreatedAt = DateTime.UtcNow,
                 SeedDomains = string.Join("\n", allDomains),
                 Owner = "Anonymous",
+                NumberOfTypoDomains = 0
             };
 
             _db.ScanJobs.Add(job);
@@ -85,6 +86,8 @@ namespace GonePhishing.Controllers
                         Error = "",
                         BaseDomain = seed
                     });
+
+                    job.NumberOfTypoDomains++;
                 }
             }
 

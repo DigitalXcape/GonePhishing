@@ -18,7 +18,7 @@ namespace GonePhishing.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string SeedDomains { get; set; }
 
-
+        public int NumberOfTypoDomains { get; set; }
     }
 
     public class DomainTask
