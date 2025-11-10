@@ -1,3 +1,13 @@
 # Visual Studio temporary files
 *.vsidx
 .vs/
+
+# Build artifacts
+bin/
+obj/
+
+# Optional: other common VS temp files
+*.user
+*.suo
+*.ncb
+*.log
