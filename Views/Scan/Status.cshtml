@@ -52,10 +52,15 @@
     setInterval(fetchStatus, 5000);
 
     function getStatusColor(status) {
-        switch (status) {
-            case "Danger": return "#ffcccc";       // red-ish
-            case "OwnedByOrgin": return "#cce5ff"; // blue-ish
-            case "NoIP": return "#f0f0f0";         // grey
+        if (!status) return "white";
+
+        // normalize to lowercase
+        const s = status.toLowerCase();
+
+        switch (s) {
+            case "danger": return "#ffcccc";       // red-ish
+            case "ownedbyorgin": return "#cce5ff"; // blue-ish
+            case "noip": return "#f0f0f0";         // grey
             default: return "white";
         }
     }
