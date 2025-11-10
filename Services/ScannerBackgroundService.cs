@@ -73,76 +73,128 @@ namespace GonePhishing.Services
             try
             {
                 // ---------------------------
-                // DNS Resolution
+                // DNS Resolution for candidate
                 // ---------------------------
+                var candidateIps = new List<string>();
                 try
                 {
-                    var ips = new List<string>();
                     var addresses = await Dns.GetHostAddressesAsync(task.CandidateDomain);
-
                     foreach (var a in addresses)
-                        ips.Add(a.ToString());
+                        candidateIps.Add(a.ToString());
 
-                    task.IPAddresses = string.Join(",", ips) ?? "";
+                    task.IPAddresses = string.Join(",", candidateIps) ?? "";
                 }
-                catch (Exception dnsEx)
+                catch
                 {
                     task.IPAddresses = "";
-                    _logger.LogInformation("DNS failed for {d}: {e}", task.CandidateDomain, dnsEx.Message);
+                }
+
+                // If candidate has 0 IPs → no need to continue
+                if (!candidateIps.Any())
+                {
+                    task.State = DomainState.Done;
+                    task.Error = "Excluded: no IPs";
+                    task.ProcessedAt = DateTime.UtcNow;
+                    await db.SaveChangesAsync(ct);
+                    return;
                 }
 
                 // ---------------------------
-                // HTTP Check (try both HTTP & HTTPS)
+                // OWNER CHECK — compare to base domain
+                // ---------------------------
+                if (!string.IsNullOrWhiteSpace(task.BaseDomain) &&
+                    !string.Equals(task.BaseDomain, task.CandidateDomain, StringComparison.OrdinalIgnoreCase))
+                {
+                    var baseIps = new List<string>();
+                    try
+                    {
+                        var addrs = await Dns.GetHostAddressesAsync(task.BaseDomain);
+                        foreach (var a in addrs) baseIps.Add(a.ToString());
+                    }
+                    catch { }
+
+                    if (baseIps.Any())
+                    {
+                        // get ASN signature set for base
+                        var baseSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                        foreach (var ip in baseIps)
+                        {
+                            var w = await WhoIsService.GetWhoIsInfoAsync(ip);
+                            if (w == null) continue;
+
+                            if (!string.IsNullOrWhiteSpace(w.asn)) baseSet.Add(w.asn);
+                            if (!string.IsNullOrWhiteSpace(w.as_domain)) baseSet.Add(w.as_domain);
+                            if (!string.IsNullOrWhiteSpace(w.as_name)) baseSet.Add(w.as_name);
+                        }
+
+                        // compare candidate
+                        foreach (var cip in candidateIps)
+                        {
+                            var w = await WhoIsService.GetWhoIsInfoAsync(cip);
+                            if (w == null) continue;
+
+                            if ((!string.IsNullOrWhiteSpace(w.asn) && baseSet.Contains(w.asn))
+                                || (!string.IsNullOrWhiteSpace(w.as_domain) && baseSet.Contains(w.as_domain))
+                                || (!string.IsNullOrWhiteSpace(w.as_name) && baseSet.Contains(w.as_name)))
+                            {
+                                task.State = DomainState.Done;
+                                task.Error = "Excluded: owned by base ASN";
+                                task.ProcessedAt = DateTime.UtcNow;
+                                await db.SaveChangesAsync(ct);
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                // ---------------------------
+                // HTTP Check
                 // ---------------------------
                 try
                 {
                     HttpResponseMessage resp = null;
-                    var urls = new[] { $"http://{task.CandidateDomain}/", $"https://{task.CandidateDomain}/" };
+
+                    var urls = new[]
+                    {
+                $"http://{task.CandidateDomain}/",
+                $"https://{task.CandidateDomain}/"
+            };
 
                     foreach (var u in urls)
                     {
                         try
                         {
-                            var request = new HttpRequestMessage(HttpMethod.Get, u);
-                            resp = await _http.SendAsync(request, ct);
+                            var req = new HttpRequestMessage(HttpMethod.Get, u);
+                            resp = await _http.SendAsync(req, ct);
                             if (resp != null) break;
                         }
-                        catch (HttpRequestException) { }
-                        catch (TaskCanceledException) { }
+                        catch { }
                     }
 
                     task.HttpStatus = resp != null ? (int?)resp.StatusCode : null;
                     task.HttpReason = resp?.ReasonPhrase ?? "";
                 }
-                catch (Exception httpEx)
+                catch
                 {
                     task.HttpStatus = null;
                     task.HttpReason = "";
-                    _logger.LogInformation("HTTP check error for {d}: {e}", task.CandidateDomain, httpEx.Message);
                 }
 
                 // ---------------------------
-                // Finalize task
+                // Finalize
                 // ---------------------------
                 task.State = DomainState.Done;
                 task.ProcessedAt = DateTime.UtcNow;
-
-                // Ensure Error is not null
                 task.Error = task.Error ?? "";
 
                 await db.SaveChangesAsync(ct);
             }
             catch (Exception ex)
             {
-                // Mark as error
+                // fallback
                 task.State = DomainState.Error;
                 task.Error = ex.Message ?? "Unknown error";
                 task.ProcessedAt = DateTime.UtcNow;
-
-                // Safe defaults
-                task.IPAddresses = task.IPAddresses ?? "";
-                task.HttpReason = task.HttpReason ?? "";
-                task.HttpStatus ??= null;
 
                 await db.SaveChangesAsync(ct);
             }

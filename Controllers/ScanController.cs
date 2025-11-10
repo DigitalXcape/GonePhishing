@@ -37,7 +37,7 @@ namespace GonePhishing.Controllers
             {
                 CreatedAt = DateTime.UtcNow,
                 SeedDomains = domains,
-                Owner = "Anonymous"
+                Owner = "Anonymous",
             };
 
             // Save the ScanJob to DB
@@ -62,7 +62,8 @@ namespace GonePhishing.Controllers
                         State = DomainState.Pending,
                         IPAddresses = "",
                         HttpReason = "",
-                        Error = ""
+                        Error = "",
+                        BaseDomain = seed
                     });
                 }
             }

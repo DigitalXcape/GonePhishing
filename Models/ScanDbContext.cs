@@ -17,6 +17,8 @@ namespace GonePhishing.Models
         public string Owner { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string SeedDomains { get; set; }
+
+
     }
 
     public class DomainTask
@@ -30,6 +32,8 @@ namespace GonePhishing.Models
         public int? HttpStatus { get; set; }
         public string HttpReason { get; set; }
         public string Error { get; set; }
+
+        public string BaseDomain { get; set; }
 
         public DomainState State { get; set; } = DomainState.Pending;
         public DateTime? ProcessedAt { get; set; }

@@ -10,13 +10,14 @@
 <button id="refresh">Refresh</button>
 <table border="1" id="results" cellpadding="4">
     <thead>
-        <tr><th>ID</th><th>Domain</th><th>State</th><th>IPs</th><th>HTTP</th><th>Error</th><th>When</th></tr>
+        <tr><th>ID</th><th>Base Domain</th><th>Domain</th><th>State</th><th>IPs</th><th>HTTP</th><th>Error</th><th>When</th></tr>
     </thead>
     <tbody>
         @foreach (var t in Model)
         {
             <tr>
                 <td>@t.Id</td>
+                <td>@t.BaseDomain</td>
                 <td>@t.CandidateDomain</td>
                 <td>@t.State</td>
                 <td>@t.IPAddresses</td>

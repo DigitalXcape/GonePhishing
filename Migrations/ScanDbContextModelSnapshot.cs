@@ -23,6 +23,10 @@ namespace GonePhishing.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("BaseDomain")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("CandidateDomain")
                         .IsRequired()
                         .HasColumnType("TEXT");
