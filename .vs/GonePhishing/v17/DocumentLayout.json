@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|c:\\users\\kodyp\\onedrive\\desktop\\schoolstuff\\securesoftware\\gonephishing\\utilities\\typogenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|solutionrelative:utilities\\typogenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|c:\\users\\kodyp\\onedrive\\desktop\\schoolstuff\\securesoftware\\gonephishing\\controllers\\scancontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|solutionrelative:controllers\\scancontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -49,10 +53,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|c:\\users\\kodyp\\onedrive\\desktop\\schoolstuff\\securesoftware\\gonephishing\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|c:\\users\\kodyp\\onedrive\\desktop\\schoolstuff\\securesoftware\\gonephishing\\utilities\\typogenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B067BD53-9EA0-4EEF-BE10-6A12ADAF9A69}|GonePhishing.csproj|solutionrelative:utilities\\typogenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -70,7 +70,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "20251110200213_addstatus.cs",
               "DocumentMoniker": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Migrations\\20251110200213_addstatus.cs",
               "RelativeDocumentMoniker": "Migrations\\20251110200213_addstatus.cs",
@@ -83,7 +83,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "ScannerBackgroundService.cs",
               "DocumentMoniker": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Services\\ScannerBackgroundService.cs",
               "RelativeDocumentMoniker": "Services\\ScannerBackgroundService.cs",
@@ -96,20 +96,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "ScanDbContext.cs",
-              "DocumentMoniker": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Models\\ScanDbContext.cs",
-              "RelativeDocumentMoniker": "Models\\ScanDbContext.cs",
-              "ToolTip": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Models\\ScanDbContext.cs",
-              "RelativeToolTip": "Models\\ScanDbContext.cs",
-              "ViewState": "AgIAACIAAAAAAAAAAAAQwDUAAAAQAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-27T19:00:35.098Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "Status.cshtml",
               "DocumentMoniker": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Views\\Scan\\Status.cshtml",
               "RelativeDocumentMoniker": "Views\\Scan\\Status.cshtml",
@@ -122,7 +109,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Views\\Scan\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Scan\\Index.cshtml",
@@ -135,7 +122,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\appsettings.json",
               "RelativeDocumentMoniker": "appsettings.json",
@@ -148,20 +135,46 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "ScanController.cs",
               "DocumentMoniker": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Controllers\\ScanController.cs",
               "RelativeDocumentMoniker": "Controllers\\ScanController.cs",
               "ToolTip": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Controllers\\ScanController.cs",
               "RelativeToolTip": "Controllers\\ScanController.cs",
-              "ViewState": "AgIAAEMAAAAAAAAAAAAswF0AAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAABcAAAAAAAAAAAAkwF0AAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-27T19:07:19.279Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "TypoGenerator.cs",
+              "DocumentMoniker": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Utilities\\TypoGenerator.cs",
+              "RelativeDocumentMoniker": "Utilities\\TypoGenerator.cs",
+              "ToolTip": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Utilities\\TypoGenerator.cs",
+              "RelativeToolTip": "Utilities\\TypoGenerator.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAOwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T19:04:44.767Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 7,
+              "Title": "ScanDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Models\\ScanDbContext.cs",
+              "RelativeDocumentMoniker": "Models\\ScanDbContext.cs",
+              "ToolTip": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Models\\ScanDbContext.cs",
+              "RelativeToolTip": "Models\\ScanDbContext.cs",
+              "ViewState": "AgIAACIAAAAAAAAAAAAQwDUAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-27T19:00:35.098Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "WhoIsInfo.cs",
               "DocumentMoniker": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Models\\WhoIsInfo.cs",
               "RelativeDocumentMoniker": "Models\\WhoIsInfo.cs",
@@ -174,7 +187,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "20251110193535_initalcreation.cs",
               "DocumentMoniker": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Migrations\\20251110193535_initalcreation.cs",
               "RelativeDocumentMoniker": "Migrations\\20251110193535_initalcreation.cs",
@@ -187,7 +200,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "WhoIsService.cs",
               "DocumentMoniker": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Services\\WhoIsService.cs",
               "RelativeDocumentMoniker": "Services\\WhoIsService.cs",
@@ -200,7 +213,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "20251110192551_addedbasedomain.cs",
               "DocumentMoniker": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Migrations\\20251110192551_addedbasedomain.cs",
               "RelativeDocumentMoniker": "Migrations\\20251110192551_addedbasedomain.cs",
@@ -214,18 +227,6 @@
             {
               "$type": "Document",
               "DocumentIndex": 12,
-              "Title": "TypoGenerator.cs",
-              "DocumentMoniker": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Utilities\\TypoGenerator.cs",
-              "RelativeDocumentMoniker": "Utilities\\TypoGenerator.cs",
-              "ToolTip": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Utilities\\TypoGenerator.cs",
-              "RelativeToolTip": "Utilities\\TypoGenerator.cs",
-              "ViewState": "AgIAAAUAAAAAAAAAAAAQwAoAAAAlAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-27T19:04:44.767Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\kodyp\\OneDrive\\Desktop\\schoolstuff\\SecureSoftware\\GonePhishing\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
