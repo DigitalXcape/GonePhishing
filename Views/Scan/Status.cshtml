@@ -8,21 +8,36 @@
 <p>Seed domains:<pre>@job.SeedDomains</pre></p>
 
 <button id="refresh">Refresh</button>
-<table border="1" id="results" cellpadding="4">
-    <thead>
-        <tr><th>ID</th><th>Base Domain</th><th>Domain</th><th>State</th><th>IPs</th><th>HTTP</th><th>Error</th><th>When</th></tr>
+<table border="1" id="results" cellpadding="4" style="border-collapse:collapse;">
+    <thead style="text-align:left;">
+        <tr>
+            <th>Base Domain</th>
+            <th>Domain</th>
+            <th>State</th>
+            <th>IPs</th>
+            <th>HTTP</th>
+            <th>Status</th> <!-- previously Error -->
+            <th>When</th>
+        </tr>
     </thead>
     <tbody>
         @foreach (var t in Model)
         {
-            <tr>
-                <td>@t.Id</td>
+            var color = t.LookUpStatus switch
+            {
+                GonePhishing.Models.LookUpStatus.Unknown => "white",
+                GonePhishing.Models.LookUpStatus.Danger => "#ffcccc",       // red-ish
+                GonePhishing.Models.LookUpStatus.OwnedByOrgin => "#cce5ff", // blue-ish
+                GonePhishing.Models.LookUpStatus.NoIP => "#f0f0f0",         // grey
+                _ => "white"
+            };
+            <tr style="background-color:@color;">
                 <td>@t.BaseDomain</td>
                 <td>@t.CandidateDomain</td>
                 <td>@t.State</td>
                 <td>@t.IPAddresses</td>
                 <td>@t.HttpStatus @t.HttpReason</td>
-                <td>@t.Error</td>
+                <td>@t.LookUpStatus</td>
                 <td>@(t.ProcessedAt?.ToLocalTime().ToString() ?? "")</td>
             </tr>
         }
@@ -31,25 +46,35 @@
 
 <script>
     const jobId = @job.Id;
-    document.getElementById('refresh').addEventListener('click', ()=> fetchStatus());
+    document.getElementById('refresh').addEventListener('click', () => fetchStatus());
 
     // auto-refresh every 5s
     setInterval(fetchStatus, 5000);
 
-    async function fetchStatus(){
+    function getStatusColor(status) {
+        switch (status) {
+            case "Danger": return "#ffcccc";       // red-ish
+            case "OwnedByOrgin": return "#cce5ff"; // blue-ish
+            case "NoIP": return "#f0f0f0";         // grey
+            default: return "white";
+        }
+    }
+
+    async function fetchStatus() {
         const r = await fetch('/Scan/StatusJson?id=' + jobId);
         const j = await r.json();
         const tbody = document.querySelector('#results tbody');
         tbody.innerHTML = '';
-        for (const t of j.tasks){
+        for (const t of j.tasks) {
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${t.id}</td>
-                            <td>${t.candidateDomain}</td>
-                            <td>${t.state}</td>
-                            <td>${t.ipAddresses ?? ''}</td>
-                            <td>${t.httpStatus ?? ''} ${t.httpReason ?? ''}</td>
-                            <td>${t.error ?? ''}</td>
-                            <td>${t.processedAt ?? ''}</td>`;
+            tr.style.backgroundColor = getStatusColor(t.lookUpStatus);
+            tr.innerHTML = `<td>${t.baseDomain ?? ''}</td>
+                                <td>${t.candidateDomain ?? ''}</td>
+                                <td>${t.state ?? ''}</td>
+                                <td>${t.ipAddresses ?? ''}</td>
+                                <td>${t.httpStatus ?? ''} ${t.httpReason ?? ''}</td>
+                                <td>${t.lookUpStatus ?? ''}</td>
+                                <td>${t.processedAt ?? ''}</td>`;
             tbody.appendChild(tr);
         }
     }

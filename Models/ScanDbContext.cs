@@ -33,6 +33,8 @@ namespace GonePhishing.Models
         public string HttpReason { get; set; }
         public string Error { get; set; }
 
+        public LookUpStatus LookUpStatus { get; set; }
+
         public string BaseDomain { get; set; }
 
         public DomainState State { get; set; } = DomainState.Pending;
@@ -45,5 +47,13 @@ namespace GonePhishing.Models
         Processing,
         Done,
         Error
+    }
+
+    public enum LookUpStatus
+    {
+        Unknown,
+        Danger,
+        OwnedByOrgin,
+        NoIP
     }
 }

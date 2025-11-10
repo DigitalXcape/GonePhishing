@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GonePhishing")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+808b49f5b282f9a8e8c02d6bb3602296f51c7da5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9634fbc437d7b54beef0c27727101523b325d241")]
 [assembly: System.Reflection.AssemblyProductAttribute("GonePhishing")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GonePhishing")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

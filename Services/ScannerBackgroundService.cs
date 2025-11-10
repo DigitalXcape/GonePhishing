@@ -72,6 +72,8 @@ namespace GonePhishing.Services
         {
             try
             {
+                task.LookUpStatus = LookUpStatus.Unknown;
+
                 // ---------------------------
                 // DNS Resolution for candidate
                 // ---------------------------
@@ -94,6 +96,7 @@ namespace GonePhishing.Services
                 {
                     task.State = DomainState.Done;
                     task.Error = "Excluded: no IPs";
+                    task.LookUpStatus = LookUpStatus.NoIP;
                     task.ProcessedAt = DateTime.UtcNow;
                     await db.SaveChangesAsync(ct);
                     return;
@@ -139,6 +142,7 @@ namespace GonePhishing.Services
                             {
                                 task.State = DomainState.Done;
                                 task.Error = "Excluded: owned by base ASN";
+                                task.LookUpStatus = LookUpStatus.OwnedByOrgin;
                                 task.ProcessedAt = DateTime.UtcNow;
                                 await db.SaveChangesAsync(ct);
                                 return;
@@ -147,18 +151,15 @@ namespace GonePhishing.Services
                     }
                 }
 
-                // ---------------------------
-                // HTTP Check
-                // ---------------------------
                 try
                 {
                     HttpResponseMessage resp = null;
 
                     var urls = new[]
                     {
-                $"http://{task.CandidateDomain}/",
-                $"https://{task.CandidateDomain}/"
-            };
+                        $"http://{task.CandidateDomain}/",
+                        $"https://{task.CandidateDomain}/"
+                    };
 
                     foreach (var u in urls)
                     {
@@ -173,6 +174,14 @@ namespace GonePhishing.Services
 
                     task.HttpStatus = resp != null ? (int?)resp.StatusCode : null;
                     task.HttpReason = resp?.ReasonPhrase ?? "";
+
+                    // ---------------------------
+                    // Mark as Danger if conditions met
+                    // ---------------------------
+                    if (candidateIps.Any() && task.HttpStatus != null && task.LookUpStatus == LookUpStatus.Unknown)
+                    {
+                        task.LookUpStatus = LookUpStatus.Danger;
+                    }
                 }
                 catch
                 {
