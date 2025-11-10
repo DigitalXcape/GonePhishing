@@ -106,18 +106,19 @@ namespace GonePhishing.Controllers
         {
             // Load tasks for the job and select only necessary fields
             var tasks = await _db.DomainTasks
-                .Where(t => t.ScanJobId == id)
-                .OrderBy(t => t.Id)
-                .Select(t => new {
-                    t.Id,
-                    t.CandidateDomain,
-                    t.State,
-                    t.IPAddresses,
-                    t.HttpStatus,
-                    t.HttpReason,
-                    t.Error,
-                    t.ProcessedAt
-                }).ToListAsync();
+            .Where(t => t.ScanJobId == id)
+            .OrderBy(t => t.Id)
+            .Select(t => new {
+                t.Id,
+                t.CandidateDomain,
+                t.State,
+                t.IPAddresses,
+                t.HttpStatus,
+                t.HttpReason,
+                t.Error,
+                t.ProcessedAt,
+                LookUpStatus = (int)t.LookUpStatus
+            }).ToListAsync();
 
             // Return JSON object with task array
             return Json(new { tasks });

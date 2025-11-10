@@ -52,16 +52,11 @@
     setInterval(fetchStatus, 5000);
 
     function getStatusColor(status) {
-        if (!status) return "white";
-
-        // normalize to lowercase
-        const s = status.toLowerCase();
-
-        switch (s) {
-            case "danger": return "#ffcccc";       // red-ish
-            case "ownedbyorgin": return "#cce5ff"; // blue-ish
-            case "noip": return "#f0f0f0";         // grey
-            default: return "white";
+        switch (status) {
+            case 1: return "#ffcccc";       // Danger (red-ish)
+            case 2: return "#cce5ff";       // OwnedByOrgin (blue-ish)
+            case 3: return "#f0f0f0";       // NoIP (grey)
+            default: return "white";         // Unknown or other
         }
     }
 
@@ -72,7 +67,7 @@
         tbody.innerHTML = '';
         for (const t of j.tasks) {
             const tr = document.createElement('tr');
-            tr.style.backgroundColor = getStatusColor(t.lookUpStatus);
+            tr.style.backgroundColor = getStatusColor(t.lookUpStatus); // integer value
             tr.innerHTML = `<td>${t.baseDomain ?? ''}</td>
                                 <td>${t.candidateDomain ?? ''}</td>
                                 <td>${t.state ?? ''}</td>
