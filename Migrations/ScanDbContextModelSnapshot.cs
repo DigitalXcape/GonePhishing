@@ -31,39 +31,34 @@ namespace GonePhishing.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("ContainsBrandKeywords")
+                    b.Property<bool?>("ContainsBrandKeywords")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("ContainsSuspiciousForms")
+                    b.Property<bool?>("ContainsSuspiciousForms")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Error")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("HasObfuscatedScripts")
+                    b.Property<bool?>("HasObfuscatedScripts")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("HtmlScore")
+                    b.Property<int?>("HtmlScore")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("HtmlTextPreview")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("HtmlTitle")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("HttpReason")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("HttpStatus")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("IPAddresses")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("LookUpStatus")
@@ -72,7 +67,7 @@ namespace GonePhishing.Migrations
                     b.Property<DateTime?>("ProcessedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("RiskLevel")
+                    b.Property<int?>("RiskLevel")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ScanJobId")
@@ -81,7 +76,7 @@ namespace GonePhishing.Migrations
                     b.Property<int>("State")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("TotalRiskScore")
+                    b.Property<int?>("TotalRiskScore")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");

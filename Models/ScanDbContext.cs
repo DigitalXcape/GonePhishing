@@ -30,28 +30,28 @@ namespace GonePhishing.Models
         // Domain + Networking
         public string CandidateDomain { get; set; }
         public string BaseDomain { get; set; }
-        public string IPAddresses { get; set; }
+        public string? IPAddresses { get; set; }
 
         // HTTP Response
         public int? HttpStatus { get; set; }
-        public string HttpReason { get; set; }
+        public string? HttpReason { get; set; }
 
         // HTML Analysis Result
-        public int HtmlScore { get; set; }
-        public string HtmlTitle { get; set; }
-        public string HtmlTextPreview { get; set; }
-        public bool ContainsSuspiciousForms { get; set; }
-        public bool ContainsBrandKeywords { get; set; }
-        public bool HasObfuscatedScripts { get; set; }
+        public int? HtmlScore { get; set; }
+        public string? HtmlTitle { get; set; }
+        public string? HtmlTextPreview { get; set; }
+        public bool? ContainsSuspiciousForms { get; set; }
+        public bool? ContainsBrandKeywords { get; set; }
+        public bool? HasObfuscatedScripts { get; set; }
 
         // Final Scoring
-        public int TotalRiskScore { get; set; }       // DNS + WHOIS + HTML combined
-        public RiskLevel RiskLevel { get; set; }      // Safe / Suspicious / Dangerous
+        public int? TotalRiskScore { get; set; }
+        public RiskLevel? RiskLevel { get; set; }
 
         // Status
         public LookUpStatus LookUpStatus { get; set; }
         public DomainState State { get; set; } = DomainState.Pending;
-        public string Error { get; set; }
+        public string? Error { get; set; }
 
         public DateTime? ProcessedAt { get; set; }
     }
