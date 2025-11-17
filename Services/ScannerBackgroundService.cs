@@ -206,6 +206,8 @@ namespace GonePhishing.Services
                     var htmlService = new HtmlService();
                     var analysis = await htmlService.AnalyzeAsync(html, task.BaseDomain);
 
+                    task.HtmlScore = analysis.RiskScore;
+
                     if (analysis.RiskScore >= 70)
                         task.LookUpStatus = LookUpStatus.Danger;
                     else if (analysis.RiskScore >= 30)
