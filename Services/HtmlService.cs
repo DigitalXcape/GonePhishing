@@ -159,7 +159,7 @@ namespace GonePhishing.Services
         // ------------------------------------------------------------------
         private void ComputeRiskScore(HtmlAnalysisResult result, string baseDomain)
         {
-            int score = 0;
+            int score = 1;
 
             // --------------------------------------------------------------
             // 1. Title contains the brand/base domain → mild impersonation
