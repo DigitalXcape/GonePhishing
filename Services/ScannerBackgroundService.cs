@@ -200,14 +200,8 @@ namespace GonePhishing.Services
                 // --------------------------------------------------------------
                 // HTML Analysis using HtmlService (only if allowed)
                 // --------------------------------------------------------------
-                bool shouldAnalyzeHtml =
-                task.LookUpStatus == LookUpStatus.Unknown ||
-                task.LookUpStatus == LookUpStatus.Safe ||
-                task.LookUpStatus == LookUpStatus.Suspicious ||
-                task.LookUpStatus == LookUpStatus.Danger;
-
-                // Only analyze if we *actually got HTML*
-                if (shouldAnalyzeHtml && !string.IsNullOrWhiteSpace(html))
+                if (task.LookUpStatus == LookUpStatus.Unknown &&
+                !string.IsNullOrWhiteSpace(html))
                 {
                     var htmlService = new HtmlService();
                     var analysis = await htmlService.AnalyzeAsync(html, task.BaseDomain);
