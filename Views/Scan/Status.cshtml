@@ -81,7 +81,7 @@
             for (const t of j.tasks) {
                 const tr = document.createElement('tr');
 
-                tr.style.backgroundColor = getStatusColor(t.LookUpStatus);
+                tr.style.backgroundColor = getStatusColor(t.lookUpStatus);
 
                 tr.innerHTML = `
                         <td>${t.baseDomain ?? ''}</td>
