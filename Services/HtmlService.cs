@@ -159,7 +159,7 @@ namespace GonePhishing.Services
         // ------------------------------------------------------------------
         private void ComputeRiskScore(HtmlAnalysisResult result, string baseDomain)
         {
-            int score = 1;
+            int score = 0;
 
             // --------------------------------------------------------------
             // 1. Title contains the brand/base domain → mild impersonation
@@ -168,7 +168,7 @@ namespace GonePhishing.Services
                 !string.IsNullOrWhiteSpace(baseDomain) &&
                 result.Title.Contains(baseDomain, StringComparison.OrdinalIgnoreCase))
             {
-                score += 10; // Mild risk: page title references target brand
+                score += 35; // Mild risk: page title references target brand
             }
 
             // --------------------------------------------------------------
