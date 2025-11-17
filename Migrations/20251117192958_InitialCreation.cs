@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GonePhishing.Migrations
 {
     /// <inheritdoc />
-    public partial class initalcreation : Migration
+    public partial class InitialCreation : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,7 +19,8 @@ namespace GonePhishing.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Owner = table.Column<string>(type: "TEXT", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    SeedDomains = table.Column<string>(type: "TEXT", nullable: false)
+                    SeedDomains = table.Column<string>(type: "TEXT", nullable: false),
+                    NumberOfTypoDomains = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -34,12 +35,21 @@ namespace GonePhishing.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     ScanJobId = table.Column<int>(type: "INTEGER", nullable: false),
                     CandidateDomain = table.Column<string>(type: "TEXT", nullable: false),
+                    BaseDomain = table.Column<string>(type: "TEXT", nullable: false),
                     IPAddresses = table.Column<string>(type: "TEXT", nullable: false),
                     HttpStatus = table.Column<int>(type: "INTEGER", nullable: true),
                     HttpReason = table.Column<string>(type: "TEXT", nullable: false),
-                    Error = table.Column<string>(type: "TEXT", nullable: false),
-                    BaseDomain = table.Column<string>(type: "TEXT", nullable: false),
+                    HtmlScore = table.Column<int>(type: "INTEGER", nullable: false),
+                    HtmlTitle = table.Column<string>(type: "TEXT", nullable: false),
+                    HtmlTextPreview = table.Column<string>(type: "TEXT", nullable: false),
+                    ContainsSuspiciousForms = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ContainsBrandKeywords = table.Column<bool>(type: "INTEGER", nullable: false),
+                    HasObfuscatedScripts = table.Column<bool>(type: "INTEGER", nullable: false),
+                    TotalRiskScore = table.Column<int>(type: "INTEGER", nullable: false),
+                    RiskLevel = table.Column<int>(type: "INTEGER", nullable: false),
+                    LookUpStatus = table.Column<int>(type: "INTEGER", nullable: false),
                     State = table.Column<int>(type: "INTEGER", nullable: false),
+                    Error = table.Column<string>(type: "TEXT", nullable: false),
                     ProcessedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>

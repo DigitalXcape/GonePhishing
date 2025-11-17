@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GonePhishing.Migrations
 {
     [DbContext(typeof(ScanDbContext))]
-    [Migration("20251110193535_initalcreation")]
-    partial class initalcreation
+    [Migration("20251117192958_InitialCreation")]
+    partial class InitialCreation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,7 +34,27 @@ namespace GonePhishing.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("ContainsBrandKeywords")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ContainsSuspiciousForms")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Error")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("HasObfuscatedScripts")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("HtmlScore")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("HtmlTextPreview")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HtmlTitle")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -49,13 +69,22 @@ namespace GonePhishing.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("LookUpStatus")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime?>("ProcessedAt")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("RiskLevel")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("ScanJobId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("State")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TotalRiskScore")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -73,6 +102,9 @@ namespace GonePhishing.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("NumberOfTypoDomains")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Owner")
                         .IsRequired()
