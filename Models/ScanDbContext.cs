@@ -27,17 +27,32 @@ namespace GonePhishing.Models
         public int ScanJobId { get; set; }
         public ScanJob ScanJob { get; set; }
 
+        // Domain + Networking
         public string CandidateDomain { get; set; }
-        public string IPAddresses { get; set; } //comma separated
+        public string BaseDomain { get; set; }
+        public string IPAddresses { get; set; }
+
+        // HTTP Response
         public int? HttpStatus { get; set; }
         public string HttpReason { get; set; }
+
+        // HTML Analysis Result
+        public int HtmlScore { get; set; }
+        public string HtmlTitle { get; set; }
+        public string HtmlTextPreview { get; set; }
+        public bool ContainsSuspiciousForms { get; set; }
+        public bool ContainsBrandKeywords { get; set; }
+        public bool HasObfuscatedScripts { get; set; }
+
+        // Final Scoring
+        public int TotalRiskScore { get; set; }       // DNS + WHOIS + HTML combined
+        public RiskLevel RiskLevel { get; set; }      // Safe / Suspicious / Dangerous
+
+        // Status
+        public LookUpStatus LookUpStatus { get; set; }
+        public DomainState State { get; set; } = DomainState.Pending;
         public string Error { get; set; }
 
-        public LookUpStatus LookUpStatus { get; set; }
-
-        public string BaseDomain { get; set; }
-
-        public DomainState State { get; set; } = DomainState.Pending;
         public DateTime? ProcessedAt { get; set; }
     }
 
@@ -52,8 +67,19 @@ namespace GonePhishing.Models
     public enum LookUpStatus
     {
         Unknown,
+        NoIP,
+        OwnedByOrigin,
+        HtmlChecked,
+        Safe,
+        Suspicious,
         Danger,
-        OwnedByOrgin,
-        NoIP
+        Error
+    }
+
+    public enum RiskLevel
+    {
+        Safe,
+        Suspicious,
+        Dangerous
     }
 }

@@ -10,12 +10,14 @@ namespace GonePhishing.Services
         private readonly IServiceProvider _svcProvider; // for creating scoped services (like DbContext)
         private readonly ILogger<ScannerBackgroundService> _logger; // logging progress and errors
         private readonly HttpClient _http; // reusable HttpClient for HTTP requests
+        private readonly HtmlService _htmlService;
 
         // Constructor
-        public ScannerBackgroundService(IServiceProvider svcProvider, ILogger<ScannerBackgroundService> logger)
+        public ScannerBackgroundService(IServiceProvider svcProvider, ILogger<ScannerBackgroundService> logger, HtmlService htmlService)
         {
             _svcProvider = svcProvider;
             _logger = logger;
+            _htmlService = htmlService;
 
             // Initialize HttpClient with a small timeout to prevent long waits
             _http = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
@@ -67,17 +69,18 @@ namespace GonePhishing.Services
             _logger.LogInformation("ScannerBackgroundService stopping.");
         }
 
-        // Handles DNS resolution and HTTP requests for a single DomainTask
+        // Handles DNS resolution, ownership checks, HTTP fetch, and HTML analysis
         private async Task ProcessDomainTask(DomainTask task, ScanDbContext db, CancellationToken ct)
         {
             try
             {
                 task.LookUpStatus = LookUpStatus.Unknown;
 
-                // ---------------------------
-                // DNS Resolution for candidate
-                // ---------------------------
+                // --------------------------------------------------------------
+                // DNS: Resolve candidate domain
+                // --------------------------------------------------------------
                 var candidateIps = new List<string>();
+
                 try
                 {
                     var addresses = await Dns.GetHostAddressesAsync(task.CandidateDomain);
@@ -91,7 +94,7 @@ namespace GonePhishing.Services
                     task.IPAddresses = "";
                 }
 
-                // If candidate has 0 IPs → no need to continue
+                // No DNS = not reachable
                 if (!candidateIps.Any())
                 {
                     task.State = DomainState.Done;
@@ -102,13 +105,14 @@ namespace GonePhishing.Services
                     return;
                 }
 
-                // ---------------------------
-                // OWNER CHECK — compare to base domain
-                // ---------------------------
+                // --------------------------------------------------------------
+                // OWNER CHECK — compare candidate ASN vs base domain ASN
+                // --------------------------------------------------------------
                 if (!string.IsNullOrWhiteSpace(task.BaseDomain) &&
                     !string.Equals(task.BaseDomain, task.CandidateDomain, StringComparison.OrdinalIgnoreCase))
                 {
                     var baseIps = new List<string>();
+
                     try
                     {
                         var addrs = await Dns.GetHostAddressesAsync(task.BaseDomain);
@@ -118,7 +122,7 @@ namespace GonePhishing.Services
 
                     if (baseIps.Any())
                     {
-                        // get ASN signature set for base
+                        // Collect ASN "signature" for base IPs
                         var baseSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                         foreach (var ip in baseIps)
                         {
@@ -130,19 +134,19 @@ namespace GonePhishing.Services
                             if (!string.IsNullOrWhiteSpace(w.as_name)) baseSet.Add(w.as_name);
                         }
 
-                        // compare candidate
+                        // Compare candidate IPs against that signature
                         foreach (var cip in candidateIps)
                         {
                             var w = await WhoIsService.GetWhoIsInfoAsync(cip);
                             if (w == null) continue;
 
-                            if ((!string.IsNullOrWhiteSpace(w.asn) && baseSet.Contains(w.asn))
-                                || (!string.IsNullOrWhiteSpace(w.as_domain) && baseSet.Contains(w.as_domain))
-                                || (!string.IsNullOrWhiteSpace(w.as_name) && baseSet.Contains(w.as_name)))
+                            if ((!string.IsNullOrWhiteSpace(w.asn) && baseSet.Contains(w.asn)) ||
+                                (!string.IsNullOrWhiteSpace(w.as_domain) && baseSet.Contains(w.as_domain)) ||
+                                (!string.IsNullOrWhiteSpace(w.as_name) && baseSet.Contains(w.as_name)))
                             {
                                 task.State = DomainState.Done;
                                 task.Error = "Excluded: owned by base ASN";
-                                task.LookUpStatus = LookUpStatus.OwnedByOrgin;
+                                task.LookUpStatus = LookUpStatus.OwnedByOrigin;
                                 task.ProcessedAt = DateTime.UtcNow;
                                 await db.SaveChangesAsync(ct);
                                 return;
@@ -151,47 +155,72 @@ namespace GonePhishing.Services
                     }
                 }
 
-                try
+                // --------------------------------------------------------------
+                // HTTP Request — Try HTTP and HTTPS
+                // --------------------------------------------------------------
+                HttpResponseMessage resp = null;
+                string html = null;
+
+                var urls = new[]
                 {
-                    HttpResponseMessage resp = null;
+            $"http://{task.CandidateDomain}/",
+            $"https://{task.CandidateDomain}/"
+        };
 
-                    var urls = new[]
+                foreach (var u in urls)
+                {
+                    try
                     {
-                        $"http://{task.CandidateDomain}/",
-                        $"https://{task.CandidateDomain}/"
-                    };
+                        var req = new HttpRequestMessage(HttpMethod.Get, u);
+                        resp = await _http.SendAsync(req, ct);
 
-                    foreach (var u in urls)
-                    {
-                        try
+                        if (resp != null)
                         {
-                            var req = new HttpRequestMessage(HttpMethod.Get, u);
-                            resp = await _http.SendAsync(req, ct);
-                            if (resp != null) break;
+                            task.HttpStatus = (int?)resp.StatusCode;
+                            task.HttpReason = resp.ReasonPhrase ?? "";
+
+                            html = await resp.Content.ReadAsStringAsync(ct);
+                            break;
                         }
-                        catch { }
                     }
-
-                    task.HttpStatus = resp != null ? (int?)resp.StatusCode : null;
-                    task.HttpReason = resp?.ReasonPhrase ?? "";
-
-                    // ---------------------------
-                    // Mark as Danger if conditions met
-                    // ---------------------------
-                    if (candidateIps.Any() && task.HttpStatus != null && task.LookUpStatus == LookUpStatus.Unknown)
-                    {
-                        task.LookUpStatus = LookUpStatus.Danger;
-                    }
+                    catch { }
                 }
-                catch
+
+                // If still no response → nothing to analyze
+                if (resp == null)
                 {
-                    task.HttpStatus = null;
-                    task.HttpReason = "";
+                    task.State = DomainState.Done;
+                    task.Error = "No HTTP response";
+                    task.LookUpStatus = LookUpStatus.NoIP;
+                    task.ProcessedAt = DateTime.UtcNow;
+                    await db.SaveChangesAsync(ct);
+                    return;
                 }
 
-                // ---------------------------
+                // --------------------------------------------------------------
+                // HTML Analysis using HtmlService (only if allowed)
+                // --------------------------------------------------------------
+                if (task.LookUpStatus != LookUpStatus.OwnedByOrigin &&
+                    task.LookUpStatus != LookUpStatus.NoIP &&
+                    task.State != DomainState.Error)
+                {
+                    var htmlService = new HtmlService();
+                    var analysis = await htmlService.AnalyzeAsync(html, task.BaseDomain);
+
+                    // --------------------------------------------------------------
+                    // Map score → LookUpStatus
+                    // --------------------------------------------------------------
+                    if (analysis.RiskScore >= 70)
+                        task.LookUpStatus = LookUpStatus.Danger;
+                    else if (analysis.RiskScore >= 30)
+                        task.LookUpStatus = LookUpStatus.Suspicious;
+                    else
+                        task.LookUpStatus = LookUpStatus.Safe;
+                }
+
+                // --------------------------------------------------------------
                 // Finalize
-                // ---------------------------
+                // --------------------------------------------------------------
                 task.State = DomainState.Done;
                 task.ProcessedAt = DateTime.UtcNow;
                 task.Error = task.Error ?? "";
@@ -200,11 +229,9 @@ namespace GonePhishing.Services
             }
             catch (Exception ex)
             {
-                // fallback
                 task.State = DomainState.Error;
                 task.Error = ex.Message ?? "Unknown error";
                 task.ProcessedAt = DateTime.UtcNow;
-
                 await db.SaveChangesAsync(ct);
             }
         }

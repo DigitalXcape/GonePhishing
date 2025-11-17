@@ -10,6 +10,19 @@
     <label>Or upload a file with domains (one per line):</label><br />
     <input type="file" name="domainFile" accept=".txt" /><br /><br />
 
+    <label>
+        <input type="checkbox" name="ignoreDuplicates" value="true" />
+        Ignore previously scanned domains
+    </label>
+    <br />
+    <small style="color: gray;">
+        If checked, domains that were scanned within the last 6 months will be ignored.
+        If they are older than 6 months, their old scan data will be deleted and they will be rescanned.
+    </small>
+
+    <br /><br />
+
     <button type="submit">Start Scan</button>
 </form>
-<p>Notes: The service will generate a few variants per domain and scan them. Run only inside your lab.</p>
+
+<p>Notes: The service will generate several typo variants per domain and scan them. Use only inside your lab.</p>

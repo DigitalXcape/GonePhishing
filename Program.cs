@@ -9,6 +9,7 @@ builder.Services.AddDbContext<ScanDbContext>(options =>
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddHostedService<ScannerBackgroundService>();
+builder.Services.AddSingleton<HtmlService>();
 
 var app = builder.Build();
 
