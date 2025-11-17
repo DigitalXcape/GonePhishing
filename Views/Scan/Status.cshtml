@@ -35,7 +35,7 @@
             <th>State</th>
             <th>IPs</th>
             <th>HTTP</th>
-            <th>Status</th> <!-- previously Error -->
+            <th>error</th>
             <th>When</th>
         </tr>
     </thead>
@@ -81,7 +81,7 @@
                                 <td>${t.state ?? ''}</td>
                                 <td>${t.ipAddresses ?? ''}</td>
                                 <td>${t.httpStatus ?? ''} ${t.httpReason ?? ''}</td>
-                                <td>${t.lookUpStatus ?? ''}</td>
+                                <td>${t.error ?? ''}</td>
                                 <td>${t.processedAt ?? ''}</td>`;
             tbody.appendChild(tr);
         }
