@@ -200,11 +200,10 @@ namespace GonePhishing.Services
                 // --------------------------------------------------------------
                 // HTML Analysis using HtmlService (only if allowed)
                 // --------------------------------------------------------------
-                if (task.LookUpStatus == LookUpStatus.Unknown &&
-                !string.IsNullOrWhiteSpace(html))
+                if (task.LookUpStatus == LookUpStatus.Unknown && !string.IsNullOrWhiteSpace(html))
                 {
                     var htmlService = new HtmlService();
-                    var analysis = await htmlService.AnalyzeAsync(html, task.BaseDomain);
+                    var analysis = await htmlService.AnalyzeAsync(resp.RequestMessage.RequestUri.ToString(), task.BaseDomain);
 
                     task.HtmlScore = analysis.RiskScore;
 
