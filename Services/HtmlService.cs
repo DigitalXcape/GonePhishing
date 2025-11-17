@@ -204,7 +204,7 @@ namespace GonePhishing.Services
             // 5. Any redirect present (secondary signal)
             // --------------------------------------------------------------
             if (!string.IsNullOrWhiteSpace(result.RedirectLocation))
-                score += 10; // Additional small risk: page performs redirect behavior
+                score += 30; // Additional small risk: page performs redirect behavior
 
             // --------------------------------------------------------------
             // 6. Logo file detected
