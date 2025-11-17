@@ -60,12 +60,13 @@
     function getStatusColor(status) {
         switch (status) {
             case 0: return "white";      // Unknown
-            case 1: return "#ffcccc";    // Danger (red)
+            case 1: return "#f0f0f0";    // NoIP (gray)
             case 2: return "#cce5ff";    // OwnedByOrigin (blue)
-            case 3: return "#f0f0f0";    // NoIP (gray)
+            case 3: return "white";      // HtmlChecked (neutral)
             case 4: return "#ccffcc";    // Safe (green)
             case 5: return "#fff5cc";    // Suspicious (yellow)
-            case 6: return "#ffebcc";    // Error (peach)
+            case 6: return "#ffcccc";    // Danger (red)
+            case 7: return "#ffebcc";    // Error (peach)
             default: return "white";
         }
     }
