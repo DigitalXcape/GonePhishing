@@ -49,11 +49,14 @@
     const page = @(page);
     const pageSize = @(pageSize);
     const jobId = @(job.Id);
+
+    // Refresh button
     document.getElementById('refresh').addEventListener('click', () => fetchStatus());
 
-    // auto-refresh every 5s
+    // Auto-refresh every 5s
     setInterval(fetchStatus, 5000);
 
+    // Map LookUpStatus integer to background color
     function getStatusColor(status) {
         switch (status) {
             case 0: return "white";      // Unknown
@@ -63,27 +66,38 @@
             case 4: return "#ccffcc";    // Safe (green)
             case 5: return "#fff5cc";    // Suspicious (yellow)
             case 6: return "#ffebcc";    // Error (peach)
-
             default: return "white";
         }
     }
 
     async function fetchStatus() {
-        const r = await fetch(`/Scan/StatusJson?id=${jobId}&page=${page}&pageSize=${pageSize}`);
-        const j = await r.json();
-        const tbody = document.querySelector('#results tbody');
-        tbody.innerHTML = '';
-        for (const t of j.tasks) {
-            const tr = document.createElement('tr');
-            tr.style.backgroundColor = getStatusColor(t.lookUpStatus); // integer value
-            tr.innerHTML = `<td>${t.baseDomain ?? ''}</td>
-                                <td>${t.candidateDomain ?? ''}</td>
-                                <td>${t.state ?? ''}</td>
-                                <td>${t.ipAddresses ?? ''}</td>
-                                <td>${t.httpStatus ?? ''} ${t.httpReason ?? ''}</td>
-                                <td>${t.error ?? ''}</td>
-                                <td>${t.processedAt ?? ''}</td>`;
-            tbody.appendChild(tr);
+        try {
+            const r = await fetch(`/Scan/StatusJson?id=${jobId}&page=${page}&pageSize=${pageSize}`);
+            const j = await r.json();
+            const tbody = document.querySelector('#results tbody');
+            tbody.innerHTML = '';
+
+            for (const t of j.tasks) {
+                const tr = document.createElement('tr');
+
+                tr.style.backgroundColor = getStatusColor(t.LookUpStatus);
+
+                tr.innerHTML = `
+                        <td>${t.baseDomain ?? ''}</td>
+                        <td>${t.candidateDomain ?? ''}</td>
+                        <td>${t.state ?? ''}</td>
+                        <td>${t.ipAddresses ?? ''}</td>
+                        <td>${t.httpStatus ?? ''} ${t.httpReason ?? ''}</td>
+                        <td>${t.error ?? ''}</td>
+                        <td>${t.processedAt ?? ''}</td>
+                    `;
+                tbody.appendChild(tr);
+            }
+        } catch (ex) {
+            console.error("Failed to fetch status:", ex);
         }
     }
+
+    // Initial load
+    fetchStatus();
 </script>
