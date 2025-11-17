@@ -42,37 +42,13 @@
     <tbody id="resultsBody">
         <!-- Start empty (code is old)-->
         
-        <!--@foreach (var t in Model)
-        {
-            var color = t.LookUpStatus switch
-            {
-                GonePhishing.Models.LookUpStatus.Unknown => "white",
-                GonePhishing.Models.LookUpStatus.Danger => "#ffcccc",   // light red
-                GonePhishing.Models.LookUpStatus.OwnedByOrigin => "#cce5ff",   // light blue
-                GonePhishing.Models.LookUpStatus.NoIP => "#f0f0f0",   // light gray
-                GonePhishing.Models.LookUpStatus.Safe => "#ccffcc",   // light green
-                GonePhishing.Models.LookUpStatus.Suspicious => "#fff5cc",   // light yellow
-                GonePhishing.Models.LookUpStatus.Error => "#ffebcc",   // peach
-
-                _ => "white"
-            };
-            <tr style="background-color:@color;">
-                <td>@t.BaseDomain</td>
-                <td>@t.CandidateDomain</td>
-                <td>@t.State</td>
-                <td>@t.IPAddresses</td>
-                <td>@t.HttpStatus @t.HttpReason</td>
-                <td>@t.LookUpStatus</td>
-                <td>@(t.ProcessedAt?.ToLocalTime().ToString() ?? "")</td>
-            </tr>-->
-        }
     </tbody>
 </table>
 
 <script>
-    const page = @page;
-    const pageSize = @pageSize;
-    const jobId = @job.Id;
+    const page = @(page);
+    const pageSize = @(pageSize);
+    const jobId = @(job.Id);
     document.getElementById('refresh').addEventListener('click', () => fetchStatus());
 
     // auto-refresh every 5s
