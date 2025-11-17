@@ -224,6 +224,7 @@ namespace GonePhishing.Controllers
                     t.Id,
                     t.CandidateDomain,
                     t.State,
+                    t.HtmlScore,
                     t.IPAddresses,
                     t.HttpStatus,
                     t.HttpReason,

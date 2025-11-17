@@ -32,7 +32,7 @@
         <tr>
             <th>Base Domain</th>
             <th>Domain</th>
-            <th>State</th>
+            <th>Score</th>
             <th>IPs</th>
             <th>HTTP</th>
             <th>error</th>
@@ -84,13 +84,13 @@
                 tr.style.backgroundColor = getStatusColor(t.lookUpStatus);
 
                 tr.innerHTML = `
-                        <td>${t.baseDomain ?? ''}</td>
-                        <td>${t.candidateDomain ?? ''}</td>
-                        <td>${t.state ?? ''}</td>
-                        <td>${t.ipAddresses ?? ''}</td>
-                        <td>${t.httpStatus ?? ''} ${t.httpReason ?? ''}</td>
-                        <td>${t.error ?? ''}</td>
-                        <td>${t.processedAt ?? ''}</td>
+                <td>${t.baseDomain ?? ''}</td>
+                <td>${t.candidateDomain ?? ''}</td>
+                <td>${t.htmlScore ?? ''}</td> <!-- Show HTML score instead of state -->
+                <td>${t.ipAddresses ?? ''}</td>
+                <td>${t.httpStatus ?? ''} ${t.httpReason ?? ''}</td>
+                <td>${t.error ?? ''}</td>
+                <td>${t.processedAt ?? ''}</td>
                     `;
                 tbody.appendChild(tr);
             }
