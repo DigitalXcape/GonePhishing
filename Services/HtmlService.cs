@@ -40,47 +40,53 @@ namespace GonePhishing.Services
             };
         }
 
-        // ------------------------------------------------------------------
-        // Fetch HTML (detect redirect manually)
-        // ------------------------------------------------------------------
         public async Task<HtmlAnalysisResult> AnalyzeAsync(string url, string baseDomain = null)
         {
             var result = new HtmlAnalysisResult { Url = url };
 
             HttpResponseMessage response;
+            string currentUrl = url;
+            int maxRedirects = 5; // avoid infinite loops
+
             try
             {
-                response = await _client.GetAsync(url);
+                for (int i = 0; i < maxRedirects; i++)
+                {
+                    response = await _client.GetAsync(currentUrl);
+
+                    // Detect 30x redirects
+                    if ((int)response.StatusCode >= 300 && (int)response.StatusCode < 400)
+                    {
+                        var location = response.Headers.Location;
+                        if (location == null) break;
+
+                        // Convert relative redirect to absolute
+                        currentUrl = location.IsAbsoluteUri ? location.ToString() : new Uri(new Uri(currentUrl), location).ToString();
+
+                        // Save last redirect
+                        result.RedirectLocation = currentUrl;
+
+                        // Detect OAuth on redirect
+                        if (Uri.TryCreate(result.RedirectLocation, UriKind.Absolute, out var redirectUri))
+                        {
+                            DetectUnexpectedOAuth(result, redirectUri.Host, baseDomain);
+                        }
+
+                        // Continue to next redirect
+                        continue;
+                    }
+
+                    // Not a redirect, fetch final HTML
+                    result.Html = await response.Content.ReadAsStringAsync();
+                    break;
+                }
             }
             catch
             {
                 return result; // unreachable or timeout
             }
 
-            // Detect redirect
-            if ((int)response.StatusCode >= 300 && (int)response.StatusCode < 400)
-            {
-                var location = response.Headers.Location;
-
-                if (location != null)
-                {
-                    // Convert relative redirects → absolute
-                    result.RedirectLocation = location.IsAbsoluteUri
-                        ? location.ToString()
-                        : new Uri(new Uri(url), location).ToString();
-                }
-            }
-
-            string redirectHost = null;
-
-            if (!string.IsNullOrWhiteSpace(result.RedirectLocation) &&
-                Uri.TryCreate(result.RedirectLocation, UriKind.Absolute, out var redirectUri))
-            {
-                redirectHost = redirectUri.Host;
-            }
-
-            // Load HTML body
-            result.Html = await response.Content.ReadAsStringAsync();
+            // If HTML is empty, return early
             if (string.IsNullOrWhiteSpace(result.Html))
                 return result;
 
@@ -94,16 +100,12 @@ namespace GonePhishing.Services
             DetectHiddenIframes(result, doc);
             DetectSuspiciousJavaScript(result, doc);
 
-            if (redirectHost != null)
-            {
-                DetectUnexpectedOAuth(result, redirectHost, baseDomain);
-            }
-
-            // Compute score
+            // Compute final risk score
             ComputeRiskScore(result, baseDomain);
 
             return result;
         }
+
 
         // ------------------------------------------------------------------
         // Extract title
