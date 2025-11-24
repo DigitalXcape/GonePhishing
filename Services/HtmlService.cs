@@ -33,7 +33,7 @@ namespace GonePhishing.Services
         {
             _client = new HttpClient(new HttpClientHandler
             {
-                AllowAutoRedirect = false // we want to detect redirects
+                AllowAutoRedirect = false
             })
             {
                 Timeout = TimeSpan.FromSeconds(10)
@@ -57,10 +57,18 @@ namespace GonePhishing.Services
                 return result; // unreachable or timeout
             }
 
-            // After detecting a redirect:
+            // Detect redirect
             if ((int)response.StatusCode >= 300 && (int)response.StatusCode < 400)
             {
-                result.RedirectLocation = response.Headers.Location?.ToString();
+                var location = response.Headers.Location;
+
+                if (location != null)
+                {
+                    // Convert relative redirects → absolute
+                    result.RedirectLocation = location.IsAbsoluteUri
+                        ? location.ToString()
+                        : new Uri(new Uri(url), location).ToString();
+                }
             }
 
             string redirectHost = null;
@@ -330,14 +338,14 @@ namespace GonePhishing.Services
             if (result.HiddenIframe)
             {
                 result.Reasons += "[Hidden Iframe] ";
-                result.RiskScore += 35;
+                score += 35;
             }
 
             //8. OAuth Redirect
             if (result.OAuthRedirect)
             {
                 result.Reasons += "[Unexpected OAuth Redirect] ";
-                result.RiskScore += 60;
+                score += 60;
             }
 
 
