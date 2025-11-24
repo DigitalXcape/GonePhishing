@@ -208,7 +208,24 @@ namespace GonePhishing.Services
                     task.HtmlScore = analysis.RiskScore;
 
                     if (analysis.RiskScore >= 70)
+                    {
                         task.LookUpStatus = LookUpStatus.Danger;
+
+                        task.RiskReasons = analysis.Reasons;
+
+                        // --------------------------
+                        // Create report entry
+                        // --------------------------
+                        var report = new ScanJobReportItem
+                        {
+                            TypoDomain = task.CandidateDomain,
+                            Reasons = analysis.Reasons ?? "High HTML risk score",
+                            ScannedAt = DateTime.UtcNow,
+                            ScanJob = await db.ScanJobs.FindAsync(task.ScanJobId)   // link job
+                        };
+
+                        db.ScanJobReports.Add(report);
+                    }
                     else if (analysis.RiskScore >= 30)
                         task.LookUpStatus = LookUpStatus.Suspicious;
                     else

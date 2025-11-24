@@ -9,6 +9,8 @@ namespace GonePhishing.Models
 
         public DbSet<ScanJob> ScanJobs { get; set; }
         public DbSet<DomainTask> DomainTasks { get; set; }
+
+        public DbSet<ScanJobReportItem> ScanJobReports { get; set; }
     }
 
     public class ScanJob
@@ -48,12 +50,26 @@ namespace GonePhishing.Models
         public int? TotalRiskScore { get; set; }
         public RiskLevel? RiskLevel { get; set; }
 
+        public string? RiskReasons {  get; set; }
+
         // Status
         public LookUpStatus LookUpStatus { get; set; }
         public DomainState State { get; set; } = DomainState.Pending;
         public string? Error { get; set; }
 
         public DateTime? ProcessedAt { get; set; }
+    }
+
+    public class ScanJobReportItem
+    {
+        public int Id { get; set; }
+        public string TypoDomain { get; set; }
+        public string Reasons { get; set; }
+        public DateTime? ScannedAt { get; set; }
+
+        public ScanJob ScanJob { get; set; }
+
+        public int ScanJobId { get; set; }
     }
 
     public enum DomainState

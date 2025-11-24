@@ -5,232 +5,199 @@ using System.Text.RegularExpressions;
 
 namespace GonePhishing.Utilities
 {
+    using System.Text.RegularExpressions;
+
     public static class TypoGenerator
     {
-        // Very simple safe generator: omission, transposition, repeated char, replacement of adjacent keys.
-        // Extended with: homoglyphs (m <-> rn), visual substitutions (o->0, l->1, a->@, etc.),
-        // keyboard-adjacent replacements, hyphen/underscore insertion, dot removal, trailing punct/digit
-        // and some conservative subdomain-aware handling.
-        //
-        // This generator is intentionally conservative (bounded and de-duplicated).
         public static IEnumerable<string> GenerateVariants(string domain)
         {
-            if (string.IsNullOrWhiteSpace(domain)) yield break;
+            if (string.IsNullOrWhiteSpace(domain))
+                yield break;
 
+            // ----------------------------
+            // Normalize domain
+            // ----------------------------
             domain = domain.Trim().ToLower();
             domain = Regex.Replace(domain, @"^https?://", "");
             domain = domain.Split('/')[0];
 
             var parts = domain.Split('.');
             if (parts.Length < 2) yield break;
-            var tld = parts[^1];
-            var name = string.Join(".", parts.Take(parts.Length - 1)); // keep subdomains conservative
 
-            var results = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            void Add(string s)
+            string tld = parts[^1];
+            string name = string.Join(".", parts.Take(parts.Length - 1));
+
+            var output = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            void Add(string candidate)
             {
-                if (string.IsNullOrWhiteSpace(s)) return;
-                var candidate = $"{s}.{tld}";
-                if (!candidate.Equals(domain, StringComparison.OrdinalIgnoreCase))
-                    results.Add(candidate);
+                if (string.IsNullOrWhiteSpace(candidate)) return;
+                string full = $"{candidate}.{tld}";
+                if (!full.Equals(domain, StringComparison.OrdinalIgnoreCase))
+                    output.Add(full);
             }
 
-            // limit to avoid explosion
-            const int MaxVariants = 300;
+            const int MaxVariants = 1000;
 
-            // Helper: apply per-position action with cap
-            bool CheckCapAndYield()
-            {
-                if (results.Count > MaxVariants)
-                {
-                    // keep under limit - stop adding more
-                    return false;
-                }
-                return true;
-            }
+            bool Cap() => output.Count < MaxVariants;
 
-            // 1) omission (remove one character)
-            for (int i = 0; i < name.Length; i++)
-            {
-                var s = name.Remove(i, 1);
-                if (s.Length >= 1)
-                {
-                    Add(s);
-                    if (!CheckCapAndYield()) break;
-                }
-            }
+            // ---------------------------------------------------------
+            // 1) Omission (exapmle.com → example.com)
+            // ---------------------------------------------------------
+            for (int i = 0; i < name.Length && Cap(); i++)
+                Add(name.Remove(i, 1));
 
-            // 2) transposition (swap adjacent)
-            for (int i = 0; i < name.Length - 1; i++)
+            // ---------------------------------------------------------
+            // 2) Transposition (exampl → exmaple)
+            // ---------------------------------------------------------
+            for (int i = 0; i < name.Length - 1 && Cap(); i++)
             {
                 var arr = name.ToCharArray();
-                var tmp = arr[i];
-                arr[i] = arr[i + 1];
-                arr[i + 1] = tmp;
+                (arr[i], arr[i + 1]) = (arr[i + 1], arr[i]);
                 Add(new string(arr));
-                if (!CheckCapAndYield()) break;
             }
 
-            // 3) double char (insert duplicate)
-            for (int i = 0; i < name.Length; i++)
+            // ---------------------------------------------------------
+            // 3) Double character (exammple)
+            // ---------------------------------------------------------
+            for (int i = 0; i < name.Length && Cap(); i++)
+                Add(name.Insert(i, name[i].ToString()));
+
+            // ---------------------------------------------------------
+            // 4) Full homoglyph substitution map
+            // ---------------------------------------------------------
+            var homoglyphs = new Dictionary<char, string[]>
+        {
+            { 'a', new[]{ "á","à","ä","â","@" } },
+            { 'e', new[]{ "é","è","ë","3" } },
+            { 'i', new[]{ "1","í","ï","l" } },
+            { 'o', new[]{ "0","ó","ö","ò" } },
+            { 'u', new[]{ "ü","ú","ù" } },
+            { 'c', new[]{ "ç" } },
+            { 'l', new[]{ "1","|" } },
+            { 's', new[]{ "$","5" } },
+            { 'g', new[]{ "9" } },
+            { 'm', new[]{ "rn" } },
+            { 'n', new[]{ "m" } },
+        };
+
+            for (int i = 0; i < name.Length && Cap(); i++)
             {
-                var s = name.Insert(i, name[i].ToString());
-                Add(s);
-                if (!CheckCapAndYield()) break;
-            }
-
-            // 4) append common digits
-            Add($"{name}1");
-            Add($"{name}0");
-
-            // 5) trailing dash or underscore insertion (common typos)
-            Add($"{name}-");
-            Add($"{name}_");
-
-            // 6) insert dash/underscore between characters (a few positions only; conservative)
-            for (int i = 1; i < name.Length && i <= 4; i++) // only try a few early positions to limit growth
-            {
-                Add(name.Substring(0, i) + "-" + name.Substring(i));
-                Add(name.Substring(0, i) + "_" + name.Substring(i));
-                if (!CheckCapAndYield()) break;
-            }
-
-            // 7) remove dots in case subdomain dot gets removed (e.g., "www.example" -> "wwwexample")
-            if (name.Contains('.'))
-            {
-                Add(name.Replace(".", ""));
-            }
-
-            // 8) collapse repeated characters (remove one of a run)
-            for (int i = 0; i < name.Length - 1; i++)
-            {
-                if (name[i] == name[i + 1])
+                char c = name[i];
+                if (homoglyphs.ContainsKey(c))
                 {
-                    var s = name.Remove(i, 1);
-                    Add(s);
-                    if (!CheckCapAndYield()) break;
-                }
-            }
-
-            // 9) common visual/homoglyph substitutions (conservative set)
-            var homoglyphs = new Dictionary<string, string[]>
-            {
-                // key -> possible visual replacements
-                { "m", new[]{ "rn" } },         // m -> rn (and we'll handle reverse below)
-                { "rn", new[]{ "m" } },         // rn -> m
-                { "o", new[]{ "0" } },
-                { "0", new[]{ "o" } },
-                { "l", new[]{ "1", "i" } },
-                { "i", new[]{ "l", "1" } },
-                { "s", new[]{ "5" } },
-                { "a", new[]{ "@" } },
-                { "e", new[]{ "3" } },
-                { "g", new[]{ "9" } },
-            };
-
-            // apply homoglyph replacements at each position where substring matches a key (use longest-first)
-            var keysByLength = homoglyphs.Keys.OrderByDescending(k => k.Length).ToArray();
-            for (int i = 0; i < name.Length; i++)
-            {
-                foreach (var k in keysByLength)
-                {
-                    if (i + k.Length <= name.Length && name.Substring(i, k.Length) == k)
+                    foreach (var rep in homoglyphs[c])
                     {
-                        foreach (var rep in homoglyphs[k])
-                        {
-                            var s = name.Substring(0, i) + rep + name.Substring(i + k.Length);
-                            Add(s);
-                            if (!CheckCapAndYield()) break;
-                        }
-                    }
-                    if (!CheckCapAndYield()) break;
-                }
-                if (!CheckCapAndYield()) break;
-            }
-
-            // 10) keyboard-adjacent replacements (QWERTY neighbors) - conservative map
-            var adjacent = new Dictionary<char, char[]>
-            {
-                { 'q', new[]{ 'w' } }, { 'w', new[]{ 'q','e','s' } }, { 'e', new[]{ 'w','r','s','d' } },
-                { 'r', new[]{ 'e','t','d','f' } }, { 't', new[]{ 'r','y','f','g' } }, { 'y', new[]{ 't','u','g','h' } },
-                { 'u', new[]{ 'y','i','h','j' } }, { 'i', new[]{ 'u','o','j','k' } }, { 'o', new[]{ 'i','p','k','l' } },
-                { 'p', new[]{ 'o','l' } }, { 'a', new[]{ 's','q' } }, { 's', new[]{ 'a','d','w' } },
-                { 'd', new[]{ 's','f','e' } }, { 'f', new[]{ 'd','g','r' } }, { 'g', new[]{ 'f','h','t' } },
-                { 'h', new[]{ 'g','j','y' } }, { 'j', new[]{ 'h','k','u' } }, { 'k', new[]{ 'j','l','i' } },
-                { 'l', new[]{ 'k','o' } }, { 'z', new[]{ 'x' } }, { 'x', new[]{ 'z','c' } },
-                { 'c', new[]{ 'x','v' } }, { 'v', new[]{ 'c','b' } }, { 'b', new[]{ 'v','n' } },
-                { 'n', new[]{ 'b','m' } }, { 'm', new[]{ 'n' } },
-                { '1', new[]{ '2' } }, { '2', new[]{ '1','3' } }
-            };
-
-            for (int i = 0; i < name.Length; i++)
-            {
-                var ch = name[i];
-                if (adjacent.TryGetValue(ch, out var neighbors))
-                {
-                    foreach (var nb in neighbors)
-                    {
-                        var s = name.Substring(0, i) + nb + name.Substring(i + 1);
-                        Add(s);
-                        if (!CheckCapAndYield()) break;
+                        Add(name[..i] + rep + name[(i + 1)..]);
+                        if (!Cap()) break;
                     }
                 }
-                if (!CheckCapAndYield()) break;
             }
 
-            // 11) replace characters with similar-looking punctuation/digits at end of word (e.g., 'store' -> 'stor3')
+            // ---------------------------------------------------------
+            // 5) Keyboard adjacency map (big)
+            // ---------------------------------------------------------
+            var keyboardMap = new Dictionary<char, char[]>
+        {
+            { 'q', new[]{ 'w','a' } }, { 'w', new[]{ 'q','e','s' } },
+            { 'e', new[]{ 'w','r','d' } }, { 'r', new[]{ 'e','t','f' } },
+            { 't', new[]{ 'r','y','g' } }, { 'y', new[]{ 't','u','h' } },
+            { 'u', new[]{ 'y','i','j' } }, { 'i', new[]{ 'u','o','k' } },
+            { 'o', new[]{ 'i','p','l' } }, { 'p', new[]{ 'o' } },
+            { 'a', new[]{ 'q','s','z' } }, { 's', new[]{ 'a','d','w','x' } },
+            { 'd', new[]{ 's','f','e','c' } }, { 'f', new[]{ 'd','g','r','v' } },
+            { 'g', new[]{ 'f','h','t','b' } }, { 'h', new[]{ 'g','j','y','n' } },
+            { 'j', new[]{ 'h','k','u','m' } }, { 'k', new[]{ 'j','l','i' } },
+            { 'l', new[]{ 'k','o' } },
+            { 'z', new[]{ 'a','x' } }, { 'x', new[]{ 'z','c','s' } },
+            { 'c', new[]{ 'x','v','d' } }, { 'v', new[]{ 'c','b','f' } },
+            { 'b', new[]{ 'v','n','g' } }, { 'n', new[]{ 'b','m','h' } },
+            { 'm', new[]{ 'n','j' } }
+        };
+
+            for (int i = 0; i < name.Length && Cap(); i++)
+            {
+                if (keyboardMap.TryGetValue(name[i], out var nbs))
+                {
+                    foreach (var rep in nbs)
+                        Add(name[..i] + rep + name[(i + 1)..]);
+                }
+            }
+
+            // ---------------------------------------------------------
+            // 6) Bitsquatting (flip each bit in each character)
+            // ---------------------------------------------------------
+            foreach (var bits in Bitsquat(name).TakeWhile(_ => Cap()))
+                Add(bits);
+
+            // ---------------------------------------------------------
+            // 7) Vowel swaps
+            // ---------------------------------------------------------
+            char[] vowels = { 'a', 'e', 'i', 'o', 'u' };
+            for (int i = 0; i < name.Length && Cap(); i++)
+            {
+                if (vowels.Contains(name[i]))
+                {
+                    foreach (var v in vowels)
+                        if (v != name[i])
+                            Add(name[..i] + v + name[(i + 1)..]);
+                }
+            }
+
+            // ---------------------------------------------------------
+            // 8) Hyphenation variants
+            // ---------------------------------------------------------
+            for (int i = 1; i < name.Length && Cap(); i++)
+                Add(name.Insert(i, "-"));
+
+            // ---------------------------------------------------------
+            // 9) Insert extra dot (subdomain injection)
+            // ---------------------------------------------------------
+            for (int i = 1; i < name.Length && Cap(); i++)
+                Add(name[..i] + "." + name[i..]);
+
+            // ---------------------------------------------------------
+            // 10) Reverse string
+            // ---------------------------------------------------------
+            Add(new string(name.Reverse().ToArray()));
+
+            // ---------------------------------------------------------
+            // 11) TLD swapping
+            // ---------------------------------------------------------
+            string[] commonTlds = { "net", "org", "co", "info", "shop", "tech", "site", "xyz" };
+            foreach (var newTld in commonTlds)
+                output.Add($"{name}.{newTld}");
+
+            // ---------------------------------------------------------
+            // 12) Prefix/Suffix expansions
+            // ---------------------------------------------------------
+            string[] prefixes = { "my", "the", "get", "try", "go", "secure", "login" };
+            string[] suffixes = { "app", "site", "online", "portal", "secure", "login" };
+
+            foreach (var p in prefixes)
+                Add(p + name);
+
+            foreach (var s in suffixes)
+                Add(name + s);
+
+            // ---------------------------------------------------------
+            // Final yield
+            // ---------------------------------------------------------
+            foreach (var item in output.Take(MaxVariants))
+                yield return item;
+        }
+
+        // Bitsquatting generator (flip each bit in ASCII)
+        private static IEnumerable<string> Bitsquat(string name)
+        {
             for (int i = 0; i < name.Length; i++)
             {
-                var c = name[i];
-                string[] repl = c switch
+                for (int bit = 0; bit < 8; bit++)
                 {
-                    'o' => new[] { "0" },
-                    'i' => new[] { "1", "l" },
-                    'l' => new[] { "1", "i" },
-                    's' => new[] { "5" },
-                    'e' => new[] { "3" },
-                    'a' => new[] { "@" },
-                    _ => Array.Empty<string>()
-                };
-                foreach (var r in repl)
-                {
-                    var s = name.Substring(0, i) + r + name.Substring(i + 1);
-                    Add(s);
-                    if (!CheckCapAndYield()) break;
+                    char flipped = (char)(name[i] ^ (1 << bit));
+                    if (char.IsLetterOrDigit(flipped))
+                        yield return name[..i] + flipped + name[(i + 1)..];
                 }
-                if (!CheckCapAndYield()) break;
-            }
-
-            // 12) "visual pair" special cases beyond homoglyph map: m <-> rn handled earlier.
-            // Also add a small set of whole-word common mistakes (conservative)
-            var commonWhole = new Dictionary<string, string[]>
-            {
-                { "www", new[]{ "" } }, // user might drop www (www.example -> example)
-                { "shop", new[]{ "sh0p", "s-hop" } },
-            };
-            foreach (var kv in commonWhole)
-            {
-                if (name.Contains(kv.Key))
-                {
-                    foreach (var rep in kv.Value)
-                    {
-                        Add(name.Replace(kv.Key, rep));
-                        if (!CheckCapAndYield()) break;
-                    }
-                }
-                if (!CheckCapAndYield()) break;
-            }
-
-            // 13) small suffix/prefix additions (common typos)
-            Add($"the{name}");
-            Add($"{name}online");
-            Add($"get{name}");
-            Add($"{name}app");
-
-            // Final: yield deduplicated results up to cap
-            foreach (var v in results.Take(MaxVariants))
-            {
-                yield return v;
             }
         }
     }

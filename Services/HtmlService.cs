@@ -17,6 +17,8 @@ namespace GonePhishing.Services
         public string RedirectLocation { get; set; }
 
         public int RiskScore { get; set; }
+
+        public string Reasons { get; set; }
     }
 
     public class HtmlService
@@ -161,60 +163,56 @@ namespace GonePhishing.Services
         {
             int score = 0;
 
-            // --------------------------------------------------------------
-            // 1. Title contains the brand/base domain → mild impersonation
-            // --------------------------------------------------------------
+            // 1. Title references brand (mild)
             if (!string.IsNullOrWhiteSpace(result.Title) &&
                 !string.IsNullOrWhiteSpace(baseDomain) &&
                 result.Title.Contains(baseDomain, StringComparison.OrdinalIgnoreCase))
             {
-                score += 35; // Mild risk: page title references target brand
+                score += 15;
+                result.Reasons = result.Reasons + "[Impersonating Title]";
             }
 
-            // --------------------------------------------------------------
-            // 2. Redirects (internal vs external)
-            // --------------------------------------------------------------
+            // 2. Redirect logic
             if (!string.IsNullOrWhiteSpace(result.RedirectLocation))
             {
                 var redirectUri = new Uri(result.RedirectLocation);
 
                 if (!redirectUri.Host.EndsWith(baseDomain, StringComparison.OrdinalIgnoreCase))
                 {
-                    score += 20; // High risk: redirect points outside the base domain
+                    score += 25; // external
+                    result.Reasons = result.Reasons + "[External Redirect]";
                 }
                 else
                 {
-                    score += 5;  // Low risk: redirect remains within same domain
+                    score += 10; // internal
+                    result.Reasons = result.Reasons + "[Internal Redirect]";
                 }
+
             }
 
-            // --------------------------------------------------------------
-            // 3. Credential form detected
-            // --------------------------------------------------------------
+            // 3. Credential form (strongest)
             if (result.HasCredentialForm)
-                score += 70; // Very high risk: page contains username/password form
+            {
+                score += 60;
+                result.Reasons = result.Reasons + "[Has Credential Form]";
+            }
 
-            // --------------------------------------------------------------
-            // 4. Form POSTs to a different domain
-            // --------------------------------------------------------------
+            // 4. POST to third-party (very strong)
             if (result.FormPostsToThirdParty)
-                score += 20; // High risk: credentials would be sent to a third party
+            {
+                score += 40;
+                result.Reasons = result.Reasons + "[Third Party Post]";
+            }
 
-            // --------------------------------------------------------------
-            // 5. Any redirect present (secondary signal)
-            // --------------------------------------------------------------
-            if (!string.IsNullOrWhiteSpace(result.RedirectLocation))
-                score += 30; // Additional small risk: page performs redirect behavior
 
-            // --------------------------------------------------------------
-            // 6. Logo file detected
-            // --------------------------------------------------------------
+            // 5. Logo usage (mild)
             if (result.Images.Any(i => i.Contains("logo", StringComparison.OrdinalIgnoreCase)))
-                score += 10; // Mild risk: presence of "logo" suggests branding impersonation
+            {
+                score += 5;
+                result.Reasons = result.Reasons + "[Contains Logo]";
+            }
 
-            // --------------------------------------------------------------
-            // Final score
-            // --------------------------------------------------------------
+
             result.RiskScore = score;
         }
     }

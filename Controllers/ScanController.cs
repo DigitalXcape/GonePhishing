@@ -228,6 +228,7 @@ namespace GonePhishing.Controllers
                     t.IPAddresses,
                     t.HttpStatus,
                     t.HttpReason,
+                    t.RiskReasons,
                     t.Error,
                     t.ProcessedAt,
                     LookUpStatus = (int)t.LookUpStatus
@@ -235,6 +236,31 @@ namespace GonePhishing.Controllers
                 .ToListAsync();
 
             return Json(new { tasks });
+        }
+
+        // ---------------------------------------------------------
+        // GET: /Scan/ScanJobReport/{id}
+        // Returns the full report for the scan job
+        // ---------------------------------------------------------
+        [HttpGet]
+        public async Task<IActionResult> ScanJobReport(int id)
+        {
+            var job = await _db.ScanJobs
+                .FirstOrDefaultAsync(j => j.Id == id);
+
+            if (job == null)
+            {
+                return NotFound("Scan job not found.");
+            }
+
+            ViewData["Job"] = job;
+
+            var items = await _db.ScanJobReports
+                .Where(r => r.ScanJob.Id == id)
+                .OrderBy(r => r.TypoDomain)
+                .ToListAsync();
+
+            return View(items);
         }
     }
 }

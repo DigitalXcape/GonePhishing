@@ -1,0 +1,50 @@
+﻿@model IEnumerable<GonePhishing.Models.ScanJobReportItem>
+
+@{
+    var job = ViewData["Job"] as GonePhishing.Models.ScanJob;
+}
+
+<h2>Scan Job Report - Job @job.Id</h2>
+<p>Created: @job.CreatedAt.ToLocalTime()</p>
+<p>Seed domains:<pre>@job.SeedDomains</pre></p>
+<p>Number of typo domains: @job.NumberOfTypoDomains</p>
+
+<table border="1" cellpadding="4" style="border-collapse:collapse; width:100%; margin-top:15px;">
+    <thead>
+        <tr style="text-align:left;">
+            <th>Typo Domain</th>
+            <th>Reasons Reported</th>
+            <th>Date Scanned</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model != null)
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.TypoDomain</td>
+
+                    <td>
+                        <div style="
+                            white-space:pre-wrap;
+                            border:1px solid #ccc;
+                            padding:6px;
+                            background:#fafafa;
+                            min-height:40px;
+                                ">
+                            @item.Reasons
+                        </div>
+                    </td>
+
+                    <td>@(item.ScannedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss") ?? "")</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="3">(No report entries found.)</td></tr>
+        }
+    </tbody>
+</table>

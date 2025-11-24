@@ -14,6 +14,13 @@
 
 <button id="refresh">Refresh</button>
 
+<!-- View Report Button -->
+<a href="/Scan/ScanJobReport/@job.Id"
+   style="display:inline-block; margin-left:10px; padding:6px 12px; background:#007bff;
+          color:white; text-decoration:none; border-radius:4px;">
+    View Report
+</a>
+
 <!-- Pagnation buttons -->
 <div style="margin:10px 0;">
     <strong>Page @(page) of @totalPages</strong><br />
@@ -33,6 +40,7 @@
             <th>Base Domain</th>
             <th>Domain</th>
             <th>Score</th>
+            <th>Risk Reasons</th>
             <th>IPs</th>
             <th>HTTP</th>
             <th>error</th>
@@ -87,6 +95,7 @@
                 <td>${t.baseDomain ?? ''}</td>
                 <td>${t.candidateDomain ?? ''}</td>
                 <td>${t.htmlScore ?? ''}</td>
+                <td>${t.riskReasons ?? ''}</td>
                 <td>${t.ipAddresses ?? ''}</td>
                 <td>${t.httpStatus ?? ''} ${t.httpReason ?? ''}</td>
                 <td>${t.error ?? ''}</td>
