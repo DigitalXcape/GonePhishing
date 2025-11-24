@@ -42,54 +42,28 @@ namespace GonePhishing.Services
 
         public async Task<HtmlAnalysisResult> AnalyzeAsync(string url, string baseDomain = null)
         {
-            var result = new HtmlAnalysisResult
+            var result = new HtmlAnalysisResult { Url = url };
+
+            HttpResponseMessage response;
+            try
             {
-                Url = url,
-            };
-
-            HttpResponseMessage response = null;
-            string currentUrl = url;
-            string lastRedirect = null;
-            int maxRedirects = 7;
-
-            for (int i = 0; i < maxRedirects; i++)
+                response = await _client.GetAsync(url);
+            }
+            catch
             {
-                response = await _client.GetAsync(currentUrl);
-
-                if ((int)response.StatusCode >= 300 && (int)response.StatusCode < 400)
-                {
-                    var location = response.Headers.Location;
-                    if (location == null)
-                        break;
-
-                    currentUrl = location.IsAbsoluteUri ? location.ToString() : new Uri(new Uri(currentUrl), location).ToString();
-                    lastRedirect = currentUrl; // track redirect URL
-
-                    if (Uri.TryCreate(currentUrl, UriKind.Absolute, out var redirectUri))
-                    {
-                        DetectUnexpectedOAuth(result, redirectUri.Host, baseDomain);
-                    }
-
-                    continue;
-                }
-
-                // final page reached
-                result.Html = await response.Content.ReadAsStringAsync();
-                break;
+                return result; // unreachable or timeout
             }
 
-            // Set the redirect location if there was any redirect
-            if (lastRedirect != null)
-                result.RedirectLocation = lastRedirect;
-
-            // If HTML is empty, stop early
+            // Load HTML body
+            result.Html = await response.Content.ReadAsStringAsync();
             if (string.IsNullOrWhiteSpace(result.Html))
                 return result;
 
-            // Parse HTML DOM
+            // Parse DOM
             var doc = new HtmlDocument();
             doc.LoadHtml(result.Html);
 
+            // Extract features
             ExtractTitle(result, doc);
             ExtractForms(result, doc, baseDomain);
             ExtractImages(result, doc);
@@ -231,45 +205,6 @@ namespace GonePhishing.Services
         }
 
         // ------------------------------------------------------------------
-        // Contains OAuth Redirect
-        // ------------------------------------------------------------------
-        private void DetectUnexpectedOAuth(HtmlAnalysisResult result, string redirectHost, string baseDomain)
-        {
-            if (redirectHost == null || baseDomain == null)
-                return;
-
-            try
-            {
-                    string[] oauthProviders = {
-                "accounts.google.com",
-                "facebook.com",
-                "login.microsoftonline.com",
-                "appleid.apple.com",
-                "auth0.com"
-                };
-
-                bool isOAuth =
-                    oauthProviders.Any(provider =>
-                        redirectHost.Equals(provider, StringComparison.OrdinalIgnoreCase) ||
-                        redirectHost.EndsWith("." + provider, StringComparison.OrdinalIgnoreCase));
-
-                bool isBaseDomainTrusted =
-                    baseDomain.Contains("google") ||
-                    baseDomain.Contains("youtube") ||
-                    baseDomain.Contains("gmail");
-
-                if (isOAuth && !isBaseDomainTrusted)
-                {
-                    result.OAuthRedirect = true;
-                }
-            }
-            catch
-            {
-                // ignore
-            }
-        }
-
-        // ------------------------------------------------------------------
         // Score phishing risk
         // ------------------------------------------------------------------
         private void ComputeRiskScore(HtmlAnalysisResult result, string baseDomain)
@@ -283,24 +218,6 @@ namespace GonePhishing.Services
             {
                 score += 35;
                 result.Reasons = result.Reasons + "[Impersonating Title]";
-            }
-
-            // 2. Redirect logic
-            if (!string.IsNullOrWhiteSpace(result.RedirectLocation))
-            {
-                var redirectUri = new Uri(result.RedirectLocation);
-
-                if (!redirectUri.Host.EndsWith(baseDomain, StringComparison.OrdinalIgnoreCase))
-                {
-                    score += 35; // external
-                    result.Reasons = result.Reasons + "[External Redirect]";
-                }
-                else
-                {
-                    score += 20; // internal
-                    result.Reasons = result.Reasons + "[Internal Redirect]";
-                }
-
             }
 
             // 3. Credential form (strongest)
