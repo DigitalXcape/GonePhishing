@@ -207,7 +207,7 @@ namespace GonePhishing.Services
 
                     task.HtmlScore = analysis.RiskScore;
 
-                    if (analysis.RiskScore >= 70)
+                    if (analysis.RiskScore >= 100)
                     {
                         task.LookUpStatus = LookUpStatus.Danger;
 
@@ -227,9 +227,16 @@ namespace GonePhishing.Services
                         db.ScanJobReports.Add(report);
                     }
                     else if (analysis.RiskScore >= 30)
+                    {
                         task.LookUpStatus = LookUpStatus.Suspicious;
+
+                        task.RiskReasons = analysis.Reasons;
+                    }
                     else
+                    {
                         task.LookUpStatus = LookUpStatus.Safe;
+                    }
+
                 }
 
                 // --------------------------------------------------------------

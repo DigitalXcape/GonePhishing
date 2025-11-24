@@ -13,6 +13,9 @@ namespace GonePhishing.Services
 
         public bool HasCredentialForm { get; set; }
         public bool FormPostsToThirdParty { get; set; }
+        public bool ObfuscatedJS {  get; set; }
+        public bool HiddenIframe { get; set; }
+
         public List<string> Images { get; set; } = new();
         public string RedirectLocation { get; set; }
 
@@ -71,6 +74,8 @@ namespace GonePhishing.Services
             ExtractTitle(result, doc);
             ExtractForms(result, doc, baseDomain);
             ExtractImages(result, doc);
+            DetectHiddenIframes(result, doc);
+            DetectSuspiciousJavaScript(result, doc);
 
             // Compute score
             ComputeRiskScore(result, baseDomain);
@@ -140,6 +145,55 @@ namespace GonePhishing.Services
         }
 
         // ------------------------------------------------------------------
+        // Suspicious JavaScript
+        // ------------------------------------------------------------------
+        private void DetectSuspiciousJavaScript(HtmlAnalysisResult result, HtmlDocument doc)
+        {
+            var scripts = doc.DocumentNode.SelectNodes("//script");
+            if (scripts == null) return;
+
+            foreach (var script in scripts)
+            {
+                var content = script.InnerHtml ?? "";
+
+                if (content.Contains("eval(", StringComparison.OrdinalIgnoreCase) ||
+                    content.Contains("atob(", StringComparison.OrdinalIgnoreCase) ||
+                    content.Contains("unescape(", StringComparison.OrdinalIgnoreCase) ||
+                    content.Contains("document.write(", StringComparison.OrdinalIgnoreCase))
+                {
+                    result.ObfuscatedJS = true;
+                }
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Hidden IFrames
+        // ------------------------------------------------------------------
+        private void DetectHiddenIframes(HtmlAnalysisResult result, HtmlDocument doc)
+        {
+            var iframes = doc.DocumentNode.SelectNodes("//iframe");
+            if (iframes == null) return;
+
+            foreach (var frame in iframes)
+            {
+                var style = frame.GetAttributeValue("style", "").ToLower();
+                var width = frame.GetAttributeValue("width", "");
+                var height = frame.GetAttributeValue("height", "");
+
+                bool isHidden =
+                    style.Contains("display:none") ||
+                    style.Contains("visibility:hidden") ||
+                    width == "0" ||
+                    height == "0";
+
+                if (isHidden)
+                {
+                    result.HiddenIframe = true;
+                }
+            }
+        }
+
+        // ------------------------------------------------------------------
         // Extract images
         // ------------------------------------------------------------------
         private void ExtractImages(HtmlAnalysisResult result, HtmlDocument doc)
@@ -168,7 +222,7 @@ namespace GonePhishing.Services
                 !string.IsNullOrWhiteSpace(baseDomain) &&
                 result.Title.Contains(baseDomain, StringComparison.OrdinalIgnoreCase))
             {
-                score += 15;
+                score += 35;
                 result.Reasons = result.Reasons + "[Impersonating Title]";
             }
 
@@ -179,12 +233,12 @@ namespace GonePhishing.Services
 
                 if (!redirectUri.Host.EndsWith(baseDomain, StringComparison.OrdinalIgnoreCase))
                 {
-                    score += 25; // external
+                    score += 35; // external
                     result.Reasons = result.Reasons + "[External Redirect]";
                 }
                 else
                 {
-                    score += 10; // internal
+                    score += 20; // internal
                     result.Reasons = result.Reasons + "[Internal Redirect]";
                 }
 
@@ -205,11 +259,25 @@ namespace GonePhishing.Services
             }
 
 
-            // 5. Logo usage (mild)
-            if (result.Images.Any(i => i.Contains("logo", StringComparison.OrdinalIgnoreCase)))
+            // 5. Logo usage (probably wont get hit much)
+            if (result.Images.Any(i => i.Contains(baseDomain, StringComparison.OrdinalIgnoreCase)))
             {
-                score += 5;
-                result.Reasons = result.Reasons + "[Contains Logo]";
+                score += 35;
+                result.Reasons = result.Reasons + "[Contains Impersonating Logo]";
+            }
+
+            //6. Obuscated JS
+            if (result.ObfuscatedJS)
+            {
+                score += 20;
+                result.Reasons = result.Reasons + "[Obfuscated JS]";
+            }
+
+            //7. Hidden IFrames
+            if (result.HiddenIframe)
+            {
+                result.Reasons += "[Hidden Iframe] ";
+                result.RiskScore += 35;
             }
 
 
