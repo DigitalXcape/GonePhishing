@@ -69,6 +69,9 @@ namespace GonePhishing.Services
             ExtractImages(result, doc);
             DetectHiddenIframes(result, doc);
             DetectSuspiciousJavaScript(result, doc);
+            DetectFormOAuthRedirect(result, doc, baseDomain);
+            DetectJsRedirect(result, doc);
+            DetectMetaRefreshRedirect(result, doc, baseDomain);
 
             // Compute final risk score
             ComputeRiskScore(result, baseDomain);
@@ -205,6 +208,98 @@ namespace GonePhishing.Services
         }
 
         // ------------------------------------------------------------------
+        // Detect forms that submit to OAuth providers
+        // ------------------------------------------------------------------
+        private void DetectFormOAuthRedirect(HtmlAnalysisResult result, HtmlDocument doc, string baseDomain)
+        {
+            var forms = doc.DocumentNode.SelectNodes("//form");
+            if (forms == null || baseDomain == null) return;
+
+            string[] oauthProviders = {
+        "accounts.google.com",
+        "facebook.com",
+        "login.microsoftonline.com",
+        "appleid.apple.com",
+        "auth0.com"
+    };
+
+            foreach (var form in forms)
+            {
+                var action = form.GetAttributeValue("action", "")?.Trim();
+                if (string.IsNullOrWhiteSpace(action)) continue;
+
+                if (!Uri.TryCreate(action, UriKind.RelativeOrAbsolute, out var uri)) continue;
+                string host = uri.IsAbsoluteUri ? uri.Host : new Uri(new Uri(result.Url), uri).Host;
+
+                bool isOAuth = oauthProviders.Any(provider =>
+                    host.Equals(provider, StringComparison.OrdinalIgnoreCase) ||
+                    host.EndsWith("." + provider, StringComparison.OrdinalIgnoreCase));
+
+                bool isBaseDomainTrusted = baseDomain.Contains("google") || baseDomain.Contains("youtube") || baseDomain.Contains("gmail");
+
+                if (isOAuth && !isBaseDomainTrusted)
+                {
+                    result.OAuthRedirect = true;
+                    break;
+                }
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Detect JavaScript redirects
+        // ------------------------------------------------------------------
+        private void DetectJsRedirect(HtmlAnalysisResult result, HtmlDocument doc)
+        {
+            var scripts = doc.DocumentNode.SelectNodes("//script");
+            if (scripts == null) return;
+
+            foreach (var script in scripts)
+            {
+                var content = script.InnerHtml ?? "";
+
+                if (content.Contains("window.location", StringComparison.OrdinalIgnoreCase) ||
+                    content.Contains("location.href", StringComparison.OrdinalIgnoreCase) ||
+                    content.Contains("location.replace", StringComparison.OrdinalIgnoreCase) ||
+                    content.Contains("document.location", StringComparison.OrdinalIgnoreCase))
+                {
+                    result.RedirectLocation = "JavaScript redirect detected";
+                    break;
+                }
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // Detect meta refresh redirects
+        // ------------------------------------------------------------------
+        private void DetectMetaRefreshRedirect(HtmlAnalysisResult result, HtmlDocument doc, string baseDomain)
+        {
+            var metas = doc.DocumentNode.SelectNodes("//meta[@http-equiv]");
+            if (metas == null) return;
+
+            foreach (var meta in metas)
+            {
+                var httpEquiv = meta.GetAttributeValue("http-equiv", "").ToLower();
+                if (httpEquiv != "refresh") continue;
+
+                var content = meta.GetAttributeValue("content", "");
+                if (string.IsNullOrWhiteSpace(content)) continue;
+
+                // Usually content="5; url=https://example.com"
+                var parts = content.Split(';', 2);
+                if (parts.Length == 2)
+                {
+                    var urlPart = parts[1].Trim();
+                    if (urlPart.StartsWith("url=", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var redirectUrl = urlPart.Substring(4).Trim('\'', '"');
+                        result.RedirectLocation = redirectUrl;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // ------------------------------------------------------------------
         // Score phishing risk
         // ------------------------------------------------------------------
         private void ComputeRiskScore(HtmlAnalysisResult result, string baseDomain)
@@ -253,16 +348,15 @@ namespace GonePhishing.Services
             if (result.HiddenIframe)
             {
                 result.Reasons += "[Hidden Iframe] ";
-                score += 35;
+                score += 50;
             }
 
             //8. OAuth Redirect
             if (result.OAuthRedirect)
             {
-                result.Reasons += "[Unexpected OAuth Redirect] ";
-                score += 60;
+                result.Reasons += "[OAuth Redirect]";
+                score += 50;
             }
-
 
             result.RiskScore = score;
         }
