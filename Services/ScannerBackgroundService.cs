@@ -207,6 +207,8 @@ namespace GonePhishing.Services
 
                     task.HtmlScore = analysis.RiskScore;
 
+                    task.RedirectLocation = analysis.RedirectLocation;
+
                     if (analysis.RiskScore >= 100)
                     {
                         task.LookUpStatus = LookUpStatus.Danger;

@@ -229,6 +229,7 @@ namespace GonePhishing.Controllers
                     t.HttpStatus,
                     t.HttpReason,
                     t.RiskReasons,
+                    t.RedirectLocation,
                     t.Error,
                     t.ProcessedAt,
                     LookUpStatus = (int)t.LookUpStatus

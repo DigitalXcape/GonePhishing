@@ -37,11 +37,11 @@
 <table border="1" id="results" cellpadding="4" style="border-collapse:collapse;">
     <thead style="text-align:left;">
         <tr>
-            <th>Base Domain</th>
             <th>Domain</th>
             <th>Score</th>
             <th>Risk Reasons</th>
             <th>IPs</th>
+            <th>Redirect</th>
             <th>HTTP</th>
             <th>error</th>
             <th>When</th>
@@ -92,15 +92,15 @@
                 tr.style.backgroundColor = getStatusColor(t.lookUpStatus);
 
                 tr.innerHTML = `
-                <td>${t.baseDomain ?? ''}</td>
                 <td>${t.candidateDomain ?? ''}</td>
                 <td>${t.htmlScore ?? ''}</td>
                 <td>${t.riskReasons ?? ''}</td>
                 <td>${t.ipAddresses ?? ''}</td>
+                <td>${t.redirectLocation ?? ''}</td>
                 <td>${t.httpStatus ?? ''} ${t.httpReason ?? ''}</td>
                 <td>${t.error ?? ''}</td>
                 <td>${t.processedAt ?? ''}</td>
-                    `;
+            `;
                 tbody.appendChild(tr);
             }
         } catch (ex) {

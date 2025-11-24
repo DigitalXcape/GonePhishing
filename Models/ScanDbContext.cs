@@ -46,6 +46,8 @@ namespace GonePhishing.Models
         public bool? ContainsBrandKeywords { get; set; }
         public bool? HasObfuscatedScripts { get; set; }
 
+        public string? RedirectLocation { get; set; }
+
         // Final Scoring
         public int? TotalRiskScore { get; set; }
         public RiskLevel? RiskLevel { get; set; }

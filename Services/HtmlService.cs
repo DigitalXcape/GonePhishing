@@ -229,10 +229,12 @@ namespace GonePhishing.Services
         // ------------------------------------------------------------------
         private void DetectUnexpectedOAuth(HtmlAnalysisResult result, string redirectHost, string baseDomain)
         {
+            if (redirectHost == null || baseDomain == null)
+                return;
+
             try
             {
-                //Hard coded Authenticators
-                string[] oauthProviders = {
+                    string[] oauthProviders = {
                 "accounts.google.com",
                 "facebook.com",
                 "login.microsoftonline.com",
@@ -240,17 +242,24 @@ namespace GonePhishing.Services
                 "auth0.com"
                 };
 
-                if (oauthProviders.Any(o => redirectHost.Contains(o)) &&
-                    !baseDomain.Contains("google") &&
-                    !baseDomain.Contains("youtube") &&
-                    !baseDomain.Contains("gmail"))
+                bool isOAuth =
+                    oauthProviders.Any(provider =>
+                        redirectHost.Equals(provider, StringComparison.OrdinalIgnoreCase) ||
+                        redirectHost.EndsWith("." + provider, StringComparison.OrdinalIgnoreCase));
+
+                bool isBaseDomainTrusted =
+                    baseDomain.Contains("google") ||
+                    baseDomain.Contains("youtube") ||
+                    baseDomain.Contains("gmail");
+
+                if (isOAuth && !isBaseDomainTrusted)
                 {
                     result.OAuthRedirect = true;
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                //do nothing if fail
+                // ignore
             }
         }
 
