@@ -15,6 +15,7 @@ namespace GonePhishing.Services
         public bool FormPostsToThirdParty { get; set; }
         public bool ObfuscatedJS {  get; set; }
         public bool HiddenIframe { get; set; }
+        public bool OAuthRedirect { get; set; }
 
         public List<string> Images { get; set; } = new();
         public string RedirectLocation { get; set; }
@@ -56,10 +57,18 @@ namespace GonePhishing.Services
                 return result; // unreachable or timeout
             }
 
-            // Detect HTTP redirect (30x)
+            // After detecting a redirect:
             if ((int)response.StatusCode >= 300 && (int)response.StatusCode < 400)
             {
                 result.RedirectLocation = response.Headers.Location?.ToString();
+            }
+
+            string redirectHost = null;
+
+            if (!string.IsNullOrWhiteSpace(result.RedirectLocation) &&
+                Uri.TryCreate(result.RedirectLocation, UriKind.Absolute, out var redirectUri))
+            {
+                redirectHost = redirectUri.Host;
             }
 
             // Load HTML body
@@ -76,6 +85,11 @@ namespace GonePhishing.Services
             ExtractImages(result, doc);
             DetectHiddenIframes(result, doc);
             DetectSuspiciousJavaScript(result, doc);
+
+            if (redirectHost != null)
+            {
+                DetectUnexpectedOAuth(result, redirectHost, baseDomain);
+            }
 
             // Compute score
             ComputeRiskScore(result, baseDomain);
@@ -211,6 +225,36 @@ namespace GonePhishing.Services
         }
 
         // ------------------------------------------------------------------
+        // Contains OAuth Redirect
+        // ------------------------------------------------------------------
+        private void DetectUnexpectedOAuth(HtmlAnalysisResult result, string redirectHost, string baseDomain)
+        {
+            try
+            {
+                //Hard coded Authenticators
+                string[] oauthProviders = {
+                "accounts.google.com",
+                "facebook.com",
+                "login.microsoftonline.com",
+                "appleid.apple.com",
+                "auth0.com"
+                };
+
+                if (oauthProviders.Any(o => redirectHost.Contains(o)) &&
+                    !baseDomain.Contains("google") &&
+                    !baseDomain.Contains("youtube") &&
+                    !baseDomain.Contains("gmail"))
+                {
+                    result.OAuthRedirect = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                //do nothing if fail
+            }
+        }
+
+        // ------------------------------------------------------------------
         // Score phishing risk
         // ------------------------------------------------------------------
         private void ComputeRiskScore(HtmlAnalysisResult result, string baseDomain)
@@ -278,6 +322,13 @@ namespace GonePhishing.Services
             {
                 result.Reasons += "[Hidden Iframe] ";
                 result.RiskScore += 35;
+            }
+
+            //8. OAuth Redirect
+            if (result.OAuthRedirect)
+            {
+                result.Reasons += "[Unexpected OAuth Redirect] ";
+                result.RiskScore += 60;
             }
 
 
