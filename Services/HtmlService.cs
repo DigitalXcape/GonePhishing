@@ -47,48 +47,40 @@ namespace GonePhishing.Services
                 Url = url,
             };
 
-            string currentUrl = url;
-            int maxRedirects = 5;
             HttpResponseMessage response = null;
+            string currentUrl = url;
+            string lastRedirect = null;
+            int maxRedirects = 7;
 
-            try
+            for (int i = 0; i < maxRedirects; i++)
             {
-                for (int i = 0; i < maxRedirects; i++)
+                response = await _client.GetAsync(currentUrl);
+
+                if ((int)response.StatusCode >= 300 && (int)response.StatusCode < 400)
                 {
-                    response = await _client.GetAsync(currentUrl);
+                    var location = response.Headers.Location;
+                    if (location == null)
+                        break;
 
-                    // 30x redirect detection
-                    if ((int)response.StatusCode >= 300 && (int)response.StatusCode < 400)
+                    currentUrl = location.IsAbsoluteUri ? location.ToString() : new Uri(new Uri(currentUrl), location).ToString();
+                    lastRedirect = currentUrl; // track redirect URL
+
+                    if (Uri.TryCreate(currentUrl, UriKind.Absolute, out var redirectUri))
                     {
-                        var location = response.Headers.Location;
-                        if (location == null)
-                            break; // No location header, stop redirecting
-
-                        // Convert relative to absolute URL
-                        currentUrl = location.IsAbsoluteUri ? location.ToString() : new Uri(new Uri(currentUrl), location).ToString();
-
-                        // Track this redirect
-                        result.RedirectLocation = currentUrl;
-
-                        // Detect OAuth on redirect
-                        if (Uri.TryCreate(currentUrl, UriKind.Absolute, out var redirectUri))
-                        {
-                            DetectUnexpectedOAuth(result, redirectUri.Host, baseDomain);
-                        }
-
-                        continue; // Follow next redirect
+                        DetectUnexpectedOAuth(result, redirectUri.Host, baseDomain);
                     }
 
-                    // Not a redirect, this is the final page
-                    result.Html = await response.Content.ReadAsStringAsync();
-                    break;
+                    continue;
                 }
+
+                // final page reached
+                result.Html = await response.Content.ReadAsStringAsync();
+                break;
             }
-            catch
-            {
-                // network error or timeout, return whatever we got
-                return result;
-            }
+
+            // Set the redirect location if there was any redirect
+            if (lastRedirect != null)
+                result.RedirectLocation = lastRedirect;
 
             // If HTML is empty, stop early
             if (string.IsNullOrWhiteSpace(result.Html))
