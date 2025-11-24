@@ -42,11 +42,14 @@ namespace GonePhishing.Services
 
         public async Task<HtmlAnalysisResult> AnalyzeAsync(string url, string baseDomain = null)
         {
-            var result = new HtmlAnalysisResult { Url = url };
+            var result = new HtmlAnalysisResult
+            {
+                Url = url,
+            };
 
-            HttpResponseMessage response;
             string currentUrl = url;
-            int maxRedirects = 5; // avoid infinite loops
+            int maxRedirects = 5;
+            HttpResponseMessage response = null;
 
             try
             {
@@ -54,43 +57,44 @@ namespace GonePhishing.Services
                 {
                     response = await _client.GetAsync(currentUrl);
 
-                    // Detect 30x redirects
+                    // 30x redirect detection
                     if ((int)response.StatusCode >= 300 && (int)response.StatusCode < 400)
                     {
                         var location = response.Headers.Location;
-                        if (location == null) break;
+                        if (location == null)
+                            break; // No location header, stop redirecting
 
-                        // Convert relative redirect to absolute
+                        // Convert relative to absolute URL
                         currentUrl = location.IsAbsoluteUri ? location.ToString() : new Uri(new Uri(currentUrl), location).ToString();
 
-                        // Save last redirect
+                        // Track this redirect
                         result.RedirectLocation = currentUrl;
 
                         // Detect OAuth on redirect
-                        if (Uri.TryCreate(result.RedirectLocation, UriKind.Absolute, out var redirectUri))
+                        if (Uri.TryCreate(currentUrl, UriKind.Absolute, out var redirectUri))
                         {
                             DetectUnexpectedOAuth(result, redirectUri.Host, baseDomain);
                         }
 
-                        // Continue to next redirect
-                        continue;
+                        continue; // Follow next redirect
                     }
 
-                    // Not a redirect, fetch final HTML
+                    // Not a redirect, this is the final page
                     result.Html = await response.Content.ReadAsStringAsync();
                     break;
                 }
             }
             catch
             {
-                return result; // unreachable or timeout
+                // network error or timeout, return whatever we got
+                return result;
             }
 
-            // If HTML is empty, return early
+            // If HTML is empty, stop early
             if (string.IsNullOrWhiteSpace(result.Html))
                 return result;
 
-            // Parse DOM
+            // Parse HTML DOM
             var doc = new HtmlDocument();
             doc.LoadHtml(result.Html);
 
