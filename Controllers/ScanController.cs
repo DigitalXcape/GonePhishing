@@ -320,6 +320,10 @@ namespace GonePhishing.Controllers
 
                 await _db.SaveChangesAsync();
             }
+            else
+            {
+                Console.WriteLine("CLOUD FLARE ERROR: " + result.Message);
+            }
 
             return RedirectToAction(nameof(ScanJobReport), new { id = job.Id });
         }
