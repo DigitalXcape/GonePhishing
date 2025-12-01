@@ -338,7 +338,7 @@ namespace GonePhishing.Controllers
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.WriteLine($"CLOUDFLARE ERROR ({host}): {result.Message}");
+                    Console.WriteLine($"CLOUDFLARE ERROR ({host}): {result.RawResponse}");
                     Console.ResetColor();
                 }
             }

@@ -87,10 +87,13 @@ namespace GonePhishing.Services
                 string raw = await res.Content.ReadAsStringAsync();
 
                 if (!res.IsSuccessStatusCode)
+                {
                     return new ReportingResult(false,
                         $"Cloudflare returned error {res.StatusCode}",
                         (int)res.StatusCode,
                         raw);
+                }
+
 
                 return new ReportingResult(true, "Phishing report submitted.", (int)res.StatusCode, raw);
             }
