@@ -49,7 +49,7 @@ namespace GonePhishing.Services
             {
                 // Cloudflare API settings
                 string accountId = "201014e8334e82c024a73ea6547317fb";
-                string apiToken = "IG2cx556bF9-5EZ70C6psSPAtlC51ZxiwFpy6TT8";
+                string apiToken = "lMsiwgoKz48wjcVIDthTaT6V_AioAiQ_zqJmTVIU";
 
                 if (string.IsNullOrWhiteSpace(accountId) || string.IsNullOrWhiteSpace(apiToken))
                     return new ReportingResult(false, "Cloudflare credentials not configured.");
