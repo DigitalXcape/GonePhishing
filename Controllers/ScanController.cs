@@ -323,5 +323,15 @@ namespace GonePhishing.Controllers
 
             return RedirectToAction(nameof(ScanJobReport), new { id = job.Id });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> AllReported()
+        {
+            var reported = await _db.DomainsReported
+                .OrderByDescending(r => r.TimeReported)
+                .ToListAsync();
+
+            return View(reported);
+        }
     }
 }

@@ -1,0 +1,35 @@
+﻿@model List<GonePhishing.Models.ReportedDomain>
+
+@{
+    ViewData["Title"] = "All Reported Domains";
+}
+
+<h2>All Reported Domains</h2>
+
+@if (Model == null || !Model.Any())
+{
+    <div style="margin-top:20px; color:#666;">
+        No domains have been reported yet.
+    </div>
+}
+else
+{
+    <table class="table table-striped" style="margin-top:20px; width:100%;">
+        <thead>
+            <tr>
+                <th>Typo Domain</th>
+                <th>Time Reported</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.TypoDomain</td>
+                    <td>@item.TimeReported.ToString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
