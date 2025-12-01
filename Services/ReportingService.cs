@@ -49,9 +49,8 @@ namespace GonePhishing.Services
             {
                 // Cloudflare API settings
                 string accountId = "201014e8334e82c024a73ea6547317fb";
-                string apiToken = "lMsiwgoKz48wjcVIDthTaT6V_AioAiQ_zqJmTVIU";
 
-                if (string.IsNullOrWhiteSpace(accountId) || string.IsNullOrWhiteSpace(apiToken))
+                if (string.IsNullOrWhiteSpace(accountId))
                     return new ReportingResult(false, "Cloudflare credentials not configured.");
 
                 string endpoint =
@@ -79,7 +78,8 @@ namespace GonePhishing.Services
                 string jsonBody = JsonSerializer.Serialize(payload);
 
                 var req = new HttpRequestMessage(HttpMethod.Post, endpoint);
-                req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiToken);
+                req.Headers.Add("X-Auth-Email", "abel9043@mstc.edu");
+                req.Headers.Add("X-Auth-Key", "1607438a710cf778d1c56a453379d47177717");
                 req.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
                 HttpResponseMessage res = await client.SendAsync(req);
