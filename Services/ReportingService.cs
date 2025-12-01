@@ -73,7 +73,7 @@ namespace GonePhishing.Services
                     owner_notification = "send",
                     justification = "Automated phishing report.",
                     name = "Gone Phishing",
-                    uris = urlBlob
+                    urls = urlBlob
                 };
 
                 string jsonBody = JsonSerializer.Serialize(payload);

@@ -322,7 +322,9 @@ namespace GonePhishing.Controllers
             }
             else
             {
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine("CLOUD FLARE ERROR: " + result.Message);
+                Console.ResetColor();
             }
 
             return RedirectToAction(nameof(ScanJobReport), new { id = job.Id });
