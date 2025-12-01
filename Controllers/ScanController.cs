@@ -1,4 +1,5 @@
 ﻿using GonePhishing.Models;
+using GonePhishing.Services;
 using GonePhishing.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -262,6 +263,65 @@ namespace GonePhishing.Controllers
                 .ToListAsync();
 
             return View(items);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ReportDomains(int id)
+        {
+            var job = await _db.ScanJobs
+                .FirstOrDefaultAsync(j => j.Id == id);
+
+            if (job == null)
+                return NotFound("Scan job not found.");
+
+            ViewData["Job"] = job;
+
+            // 1. Get all typo domains for this job
+            var allTypoDomains = await _db.ScanJobReports
+                .Where(r => r.ScanJob.Id == id)
+                .Select(r => r.TypoDomain)
+                .Distinct()
+                .ToListAsync();
+
+            // 2. Get all previously reported domains
+            var alreadyReported = await _db.DomainsReported
+                .Select(r => r.TypoDomain)
+                .ToListAsync();
+
+            // 3. Only include domains NOT yet reported
+            var toReport = allTypoDomains
+                .Where(d => !alreadyReported.Contains(d))
+                .ToList();
+
+            // Nothing to report?
+            if (toReport.Count == 0)
+            {
+                return RedirectToAction(nameof(ScanJobReport), new { id = job.Id });
+            }
+
+            //Cap maximum to 250 URLs
+            const int MAX_URLS = 250;
+            toReport = toReport.Take(MAX_URLS).ToList();
+
+            // 4. Send the (capped) list to the reporting service
+            var result = await ReportingService.ReportDomainsAsync(toReport);
+
+            // 5. If successful, insert them into the DB
+            if (result.Success)
+            {
+                foreach (var domain in toReport)
+                {
+                    _db.DomainsReported.Add(new ReportedDomain
+                    {
+                        TypoDomain = domain,
+                        TimeReported = DateTime.UtcNow
+                    });
+                }
+
+                await _db.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(ScanJobReport), new { id = job.Id });
         }
     }
 }

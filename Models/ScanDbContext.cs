@@ -11,6 +11,8 @@ namespace GonePhishing.Models
         public DbSet<DomainTask> DomainTasks { get; set; }
 
         public DbSet<ScanJobReportItem> ScanJobReports { get; set; }
+
+        public DbSet<ReportedDomain> DomainsReported { get; set; }
     }
 
     public class ScanJob
@@ -72,6 +74,13 @@ namespace GonePhishing.Models
         public ScanJob ScanJob { get; set; }
 
         public int ScanJobId { get; set; }
+    }
+
+    public class ReportedDomain
+    {
+        public int Id { get; set; }
+        public string TypoDomain { get; set; }
+        public DateTime? TimeReported {  get; set; }
     }
 
     public enum DomainState
