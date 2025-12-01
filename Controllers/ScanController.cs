@@ -276,55 +276,71 @@ namespace GonePhishing.Controllers
 
             ViewData["Job"] = job;
 
-            // 1. Get all typo domains for this job
+            // 1. Pull all typo domains for this scan job
             var allTypoDomains = await _db.ScanJobReports
                 .Where(r => r.ScanJob.Id == id)
                 .Select(r => r.TypoDomain)
                 .Distinct()
                 .ToListAsync();
 
-            // 2. Get all previously reported domains
+            // 2. Pull already reported domains
             var alreadyReported = await _db.DomainsReported
                 .Select(r => r.TypoDomain)
                 .ToListAsync();
 
-            // 3. Only include domains NOT yet reported
-            var toReport = allTypoDomains
+            // 3. Only report domains not yet reported
+            var newDomains = allTypoDomains
                 .Where(d => !alreadyReported.Contains(d))
                 .ToList();
 
-            // Nothing to report?
-            if (toReport.Count == 0)
-            {
+            if (newDomains.Count == 0)
                 return RedirectToAction(nameof(ScanJobReport), new { id = job.Id });
-            }
 
-            //Cap maximum to 250 URLs
+            // 4. Convert each domain → full URL ("https://domain/path")
+            var fullUrls = newDomains
+                .Select(domain => $"http://{domain}")
+                .Where(url => Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                .ToList();
+
+            // 5. Group by hostname (Cloudflare requirement)
+            var grouped = fullUrls
+                .GroupBy(url => new Uri(url).Host)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
             const int MAX_URLS = 250;
-            toReport = toReport.Take(MAX_URLS).ToList();
 
-            // 4. Send the (capped) list to the reporting service
-            var result = await ReportingService.ReportDomainsAsync(toReport);
-
-            // 5. If successful, insert them into the DB
-            if (result.Success)
+            foreach (var kvp in grouped)
             {
-                foreach (var domain in toReport)
+                string host = kvp.Key;
+                List<string> urlsForHost = kvp.Value;
+
+                // Cap at 250 URLs
+                var sendList = urlsForHost.Take(MAX_URLS).ToList();
+
+                var result = await ReportingService.ReportDomainsAsync(sendList);
+
+                if (result.Success)
                 {
-                    _db.DomainsReported.Add(new ReportedDomain
+                    // Save each reported domain in its ORIGINAL format
+                    foreach (var fullUrl in sendList)
                     {
-                        TypoDomain = domain,
-                        TimeReported = DateTime.UtcNow
-                    });
-                }
+                        string originalDomain = new Uri(fullUrl).Host;
 
-                await _db.SaveChangesAsync();
-            }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.WriteLine("CLOUD FLARE ERROR: " + result.Message);
-                Console.ResetColor();
+                        _db.DomainsReported.Add(new ReportedDomain
+                        {
+                            TypoDomain = originalDomain,
+                            TimeReported = DateTime.UtcNow
+                        });
+                    }
+
+                    await _db.SaveChangesAsync();
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.WriteLine($"CLOUDFLARE ERROR ({host}): {result.Message}");
+                    Console.ResetColor();
+                }
             }
 
             return RedirectToAction(nameof(ScanJobReport), new { id = job.Id });
