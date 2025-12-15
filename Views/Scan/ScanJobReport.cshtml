@@ -6,7 +6,6 @@
 
 <h2>Scan Job Report - Job @job.Id</h2>
 <p>Created: @job.CreatedAt.ToLocalTime()</p>
-<p>Seed domains:<pre>@job.SeedDomains</pre></p>
 <p>Number of typo domains: @job.NumberOfTypoDomains</p>
 
 <form action="/Scan/ReportDomains/@job.Id" method="post" style="display:inline;">
