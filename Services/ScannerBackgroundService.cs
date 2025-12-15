@@ -4,7 +4,7 @@ using System.Net;
 
 namespace GonePhishing.Services
 {
-    // BackgroundService runs continuously in the background while the ASP.NET app is running
+    // BackgroundService runs continuously in the background while the ASP.NET app is running 
     public class ScannerBackgroundService : BackgroundService
     {
         private readonly IServiceProvider _svcProvider; // for creating scoped services (like DbContext)
