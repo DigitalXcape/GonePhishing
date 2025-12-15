@@ -347,7 +347,7 @@ namespace GonePhishing.Services
             //7. Hidden IFrames
             if (result.HiddenIframe)
             {
-                result.Reasons += "[Hidden Iframe] ";
+                result.Reasons += "[Hidden Iframe]";
                 score += 50;
             }
 

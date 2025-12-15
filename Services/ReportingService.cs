@@ -38,6 +38,44 @@ namespace GonePhishing.Services
 
     public class ReportingService
     {
+        public static async Task<ReportingResult?> ExportDomainsToTextFileAsync(
+            List<string> urls,
+            string? outputDirectory = null)
+        {
+            if (urls == null || urls.Count == 0)
+                return new ReportingResult(false, "No URLs provided.");
+
+            try
+            {
+                // Default to app base directory if none provided
+                outputDirectory ??= AppContext.BaseDirectory;
+
+                // Ensure directory exists
+                Directory.CreateDirectory(outputDirectory);
+
+                // Create filename with timestamp
+                string fileName = $"phishing-report-{DateTime.UtcNow:yyyyMMdd-HHmmss}.txt";
+                string filePath = Path.Combine(outputDirectory, fileName);
+
+                // One domain per line (Cloudflare-compatible)
+                string fileContents = string.Join(Environment.NewLine, urls);
+
+                await File.WriteAllTextAsync(filePath, fileContents, Encoding.UTF8);
+
+                return new ReportingResult(
+                    success: true,
+                    message: $"Report written to {fileName}",
+                    statusCode: 200,
+                    raw: fileContents
+                );
+            }
+            catch (Exception ex)
+            {
+                return new ReportingResult(false, ex.Message, 0, ex.ToString());
+            }
+        }
+
+        /*
         private static readonly HttpClient client = new HttpClient();
 
         public static async Task<ReportingResult?> ReportDomainsAsync(List<string> urls, TimeSpan? timeout = null)
@@ -102,5 +140,6 @@ namespace GonePhishing.Services
                 return new ReportingResult(false, ex.Message, 0, ex.ToString());
             }
         }
+        */
     }
 }

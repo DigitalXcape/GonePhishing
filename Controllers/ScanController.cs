@@ -3,6 +3,7 @@ using GonePhishing.Services;
 using GonePhishing.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace GonePhishing.Controllers
 {
@@ -274,8 +275,6 @@ namespace GonePhishing.Controllers
             if (job == null)
                 return NotFound("Scan job not found.");
 
-            ViewData["Job"] = job;
-
             // 1. Pull all typo domains for this scan job
             var allTypoDomains = await _db.ScanJobReports
                 .Where(r => r.ScanJob.Id == id)
@@ -288,62 +287,39 @@ namespace GonePhishing.Controllers
                 .Select(r => r.TypoDomain)
                 .ToListAsync();
 
-            // 3. Only report domains not yet reported
+            // 3. Only include domains not yet reported
             var newDomains = allTypoDomains
                 .Where(d => !alreadyReported.Contains(d))
+                .OrderBy(d => d)
                 .ToList();
 
             if (newDomains.Count == 0)
-                return RedirectToAction(nameof(ScanJobReport), new { id = job.Id });
+                return RedirectToAction(nameof(ScanJobReport), new { id });
 
-            // 4. Convert each domain → full URL ("https://domain/path")
-            var fullUrls = newDomains
-                .Select(domain => $"http://{domain}")
-                .Where(url => Uri.IsWellFormedUriString(url, UriKind.Absolute))
-                .ToList();
+            // 4. Build file contents (ONE DOMAIN PER LINE)
+            string fileContents = string.Join(Environment.NewLine, newDomains);
+            byte[] fileBytes = Encoding.UTF8.GetBytes(fileContents);
 
-            // 5. Group by hostname (Cloudflare requirement)
-            var grouped = fullUrls
-                .GroupBy(url => new Uri(url).Host)
-                .ToDictionary(g => g.Key, g => g.ToList());
+            string fileName = $"phishing-domains-job-{id}-{DateTime.UtcNow:yyyyMMdd-HHmmss}.txt";
 
-            const int MAX_URLS = 250;
-
-            foreach (var kvp in grouped)
+            // 5. Mark domains as reported (same behavior as before)
+            foreach (var domain in newDomains)
             {
-                string host = kvp.Key;
-                List<string> urlsForHost = kvp.Value;
-
-                // Cap at 250 URLs
-                var sendList = urlsForHost.Take(MAX_URLS).ToList();
-
-                var result = await ReportingService.ReportDomainsAsync(sendList);
-
-                if (result.Success)
+                _db.DomainsReported.Add(new ReportedDomain
                 {
-                    // Save each reported domain in its ORIGINAL format
-                    foreach (var fullUrl in sendList)
-                    {
-                        string originalDomain = new Uri(fullUrl).Host;
-
-                        _db.DomainsReported.Add(new ReportedDomain
-                        {
-                            TypoDomain = originalDomain,
-                            TimeReported = DateTime.UtcNow
-                        });
-                    }
-
-                    await _db.SaveChangesAsync();
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.WriteLine($"CLOUDFLARE ERROR ({host}): {result.RawResponse}");
-                    Console.ResetColor();
-                }
+                    TypoDomain = domain,
+                    TimeReported = DateTime.UtcNow
+                });
             }
 
-            return RedirectToAction(nameof(ScanJobReport), new { id = job.Id });
+            await _db.SaveChangesAsync();
+
+            // 6. Trigger browser download
+            return File(
+                fileContents: fileBytes,
+                contentType: "text/plain",
+                fileDownloadName: fileName
+            );
         }
 
         [HttpGet]
