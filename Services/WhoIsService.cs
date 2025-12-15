@@ -7,7 +7,7 @@ namespace GonePhishing.Services
     {
         private static readonly string token = "7da7760ba588fc";
 
-        // Public async method returns WhoIsInfo or null on error
+        // Public async method returns WhoIsInfo or null on error 
         public static async Task<WhoIsInfo?> GetWhoIsInfoAsync(string ipAddress, TimeSpan? timeout = null)
         {
             try
